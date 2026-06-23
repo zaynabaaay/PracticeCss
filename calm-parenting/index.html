@@ -1,0 +1,331 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>The Calm Parenting Bundle — Product Mockup</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;500;600&family=Jost:wght@300;400;500&display=swap" rel="stylesheet">
+<style>
+  :root {
+    /* ---- design tokens (all px values are 1/2000th of the 2000x2000 canvas) ---- */
+    --ivory: #f6f0e4;
+    --ivory-deep: #efe6d3;
+    --cream: #faf6ec;
+    --cream-shadow: #e6dcc6;
+    --taupe: #8d7c68;
+    --taupe-dark: #5c5042;
+    --ink: #2c2620;
+    --olive: #707a4f;
+    --olive-dark: #545c3a;
+    --rattan: #b08c5f;
+    --rattan-dark: #8a6a42;
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  html, body {
+    min-height: 100%;
+    background: #d9d2c2;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-family: 'Jost', sans-serif;
+  }
+
+  /* ---------------------------------------------------------
+     STAGE — the 2000x2000 canvas. container-type lets every
+     child use cqw (1cqw = 1% of stage width) so the whole
+     composition scales perfectly at any viewport size while
+     keeping the exact px proportions of the original design.
+     --------------------------------------------------------- */
+  .stage {
+    position: relative;
+    width: min(100vw, 100vh);
+    aspect-ratio: 1 / 1;
+    container-type: inline-size;
+    overflow: hidden;
+    background:
+      radial-gradient(circle at 30% 18%, rgba(255,255,255,0.5), transparent 55%),
+      linear-gradient(160deg, var(--ivory) 0%, var(--ivory-deep) 60%, #e8ddc6 100%);
+    box-shadow: 0 2cqw 6cqw rgba(0,0,0,0.18);
+  }
+
+  /* ===================== TITLE BLOCK ===================== */
+  .title-block {
+    position: absolute;
+    top: 6.5cqw;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 62cqw;
+    text-align: center;
+    color: var(--ink);
+  }
+
+  .title-block .eyebrow {
+    display: block;
+    font-family: 'Playfair Display', serif;
+    font-size: 1.9cqw;
+    letter-spacing: 0.55cqw;
+    font-weight: 500;
+    color: var(--taupe-dark);
+    margin-bottom: 1.4cqw;
+  }
+
+  .title-main {
+    font-family: 'Playfair Display', serif;
+    font-weight: 600;
+    font-size: 5.6cqw;
+    line-height: 1.18;
+    letter-spacing: 0.18cqw;
+    margin-bottom: 1.6cqw;
+  }
+
+  .title-row {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 1.8cqw;
+  }
+
+  .title-row .line {
+    flex: 1 1 auto;
+    max-width: 11cqw;
+    height: 0.13cqw;
+    background: var(--taupe-dark);
+    opacity: 0.85;
+  }
+
+  .title-row .word {
+    font-family: 'Playfair Display', serif;
+    font-weight: 600;
+    font-size: 5.6cqw;
+    letter-spacing: 0.45cqw;
+    white-space: nowrap;
+  }
+
+  /* leaf icon */
+  .leaf-icon {
+    width: 3cqw;
+    height: 3cqw;
+    margin: 2.2cqw auto 1.6cqw;
+    display: block;
+  }
+
+  .subtitle {
+    font-family: 'Jost', sans-serif;
+    font-weight: 400;
+    font-size: 1.15cqw;
+    letter-spacing: 0.22cqw;
+    line-height: 1.9;
+    color: var(--taupe);
+    text-transform: uppercase;
+  }
+
+  /* ===================== OLIVE BRANCH (upper left) ===================== */
+  .olive-branch {
+    position: absolute;
+    top: 3cqw;
+    left: 2.5cqw;
+    width: 16cqw;
+    height: 20cqw;
+    opacity: 0.92;
+    transform: rotate(-6deg);
+  }
+
+  /* ===================== RATTAN MAT (upper right) ===================== */
+  .rattan-mat {
+    position: absolute;
+    top: 4cqw;
+    right: 3cqw;
+    width: 15cqw;
+    height: 15cqw;
+    border-radius: 50%;
+    background:
+      radial-gradient(circle at 50% 50%, transparent 62%, rgba(0,0,0,0.10) 100%),
+      repeating-conic-gradient(
+        from 0deg,
+        var(--rattan) 0deg 4deg,
+        var(--rattan-dark) 4deg 8deg
+      ),
+      radial-gradient(circle at 35% 30%, rgba(255,255,255,0.25), transparent 60%);
+    box-shadow:
+      inset 0 0 0 0.35cqw rgba(255,255,255,0.18),
+      inset 0 0.4cqw 1cqw rgba(0,0,0,0.25),
+      0 1.2cqw 2.2cqw rgba(80,60,30,0.22);
+  }
+
+  .rattan-mat::before {
+    content: '';
+    position: absolute;
+    inset: 12%;
+    border-radius: 50%;
+    background:
+      repeating-radial-gradient(
+        circle at 50% 50%,
+        rgba(60,40,15,0.18) 0,
+        rgba(60,40,15,0.18) 0.25cqw,
+        transparent 0.25cqw,
+        transparent 1.4cqw
+      );
+    mix-blend-mode: multiply;
+  }
+
+  .rattan-mat::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    border-radius: 50%;
+    box-shadow: inset 0 0 0 0.15cqw rgba(255,255,255,0.12);
+  }
+
+  /* ===================== BOOK MOCKUPS ===================== */
+  .books {
+    position: absolute;
+    inset: 0;
+  }
+
+  .book {
+    position: absolute;
+    width: 23cqw;
+    height: 31cqw;
+    border-radius: 0.3cqw;
+    background: linear-gradient(150deg, var(--cream) 0%, #f3ecdb 55%, var(--cream-shadow) 100%);
+  }
+
+  .book::before {
+    /* stacked-page edge, suggests thickness of a printed guide */
+    content: '';
+    position: absolute;
+    inset: 0;
+    border-radius: inherit;
+    background: var(--cream-shadow);
+    transform: translate(0.55cqw, 0.55cqw);
+    z-index: -1;
+  }
+
+  .book::after {
+    /* subtle cover sheen + edge line, blank on purpose */
+    content: '';
+    position: absolute;
+    inset: 0.7cqw;
+    border: 0.06cqw solid rgba(140,120,95,0.28);
+    border-radius: 0.15cqw;
+    background: linear-gradient(120deg, rgba(255,255,255,0.35), transparent 45%);
+  }
+
+  .book-shadow {
+    position: absolute;
+    border-radius: 50%;
+    background: radial-gradient(ellipse at center, rgba(60,48,32,0.30), transparent 72%);
+    filter: blur(1.4cqw);
+  }
+
+  /* ambient cluster shadow beneath all three books */
+  .cluster-shadow {
+    position: absolute;
+    top: 79cqw;
+    left: 50%;
+    width: 58cqw;
+    height: 7cqw;
+    transform: translateX(-50%);
+    background: radial-gradient(ellipse at center, rgba(50,40,28,0.22), transparent 75%);
+    filter: blur(1.8cqw);
+  }
+
+  .book--left {
+    top: 47cqw;
+    left: 24cqw;
+    transform: rotate(-8deg);
+    z-index: 1;
+  }
+  .book--left .book-shadow {
+    width: 19cqw; height: 5cqw;
+    top: 28cqw; left: 1.5cqw;
+  }
+
+  .book--right {
+    top: 47cqw;
+    left: 53cqw;
+    transform: rotate(8deg);
+    z-index: 2;
+  }
+  .book--right .book-shadow {
+    width: 19cqw; height: 5cqw;
+    top: 28cqw; left: 1.5cqw;
+  }
+
+  .book--center {
+    top: 52cqw;
+    left: 38.5cqw;
+    transform: rotate(0deg);
+    z-index: 3;
+    box-shadow: 0 1.6cqw 3.2cqw rgba(40,32,22,0.28);
+  }
+  .book--center .book-shadow {
+    width: 21cqw; height: 5.5cqw;
+    top: 29cqw; left: 1cqw;
+  }
+</style>
+</head>
+<body>
+  <div class="stage">
+
+    <!-- TITLE -->
+    <div class="title-block">
+      <span class="eyebrow">THE</span>
+      <div class="title-main">CALM PARENTING</div>
+      <div class="title-row">
+        <span class="line"></span>
+        <span class="word">BUNDLE</span>
+        <span class="line"></span>
+      </div>
+
+      <svg class="leaf-icon" viewBox="0 0 64 64" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <path d="M32 6 C 46 14, 52 30, 32 58 C 12 30, 18 14, 32 6 Z"
+              fill="#707a4f" opacity="0.85"/>
+        <path d="M32 10 L32 54" stroke="#545c3a" stroke-width="1.4" opacity="0.6"/>
+      </svg>
+
+      <p class="subtitle">PRACTICAL TOOLS FOR MORE PEACEFUL<br>DAYS AND STRONGER CONNECTIONS</p>
+    </div>
+
+    <!-- OLIVE BRANCH -->
+    <svg class="olive-branch" viewBox="0 0 200 260" fill="none" xmlns="http://www.w3.org/2000/svg">
+      <path d="M40 250 C 60 190, 70 140, 120 60 C 140 30, 155 18, 175 8"
+            stroke="#6b6240" stroke-width="3" stroke-linecap="round" fill="none" opacity="0.8"/>
+      <g fill="#707a4f">
+        <ellipse cx="55" cy="215" rx="15" ry="7" transform="rotate(-35 55 215)"/>
+        <ellipse cx="70" cy="185" rx="16" ry="7.5" transform="rotate(35 70 185)"/>
+        <ellipse cx="82" cy="155" rx="15" ry="7" transform="rotate(-30 82 155)"/>
+        <ellipse cx="98" cy="125" rx="16" ry="7.5" transform="rotate(32 98 125)"/>
+        <ellipse cx="112" cy="98" rx="14" ry="6.5" transform="rotate(-28 112 98)"/>
+        <ellipse cx="128" cy="72" rx="15" ry="7" transform="rotate(30 128 72)"/>
+        <ellipse cx="145" cy="50" rx="13" ry="6" transform="rotate(-25 145 50)"/>
+        <ellipse cx="160" cy="30" rx="13" ry="6" transform="rotate(28 160 30)"/>
+        <ellipse cx="178" cy="14" rx="12" ry="5.5" transform="rotate(-20 178 14)"/>
+      </g>
+      <g fill="#5c6a3e">
+        <ellipse cx="63" cy="200" rx="10" ry="5" transform="rotate(-35 63 200)" opacity="0.7"/>
+        <ellipse cx="90" cy="140" rx="10" ry="5" transform="rotate(32 90 140)" opacity="0.7"/>
+        <ellipse cx="120" cy="85" rx="10" ry="5" transform="rotate(-28 120 85)" opacity="0.7"/>
+        <ellipse cx="152" cy="40" rx="9" ry="4.5" transform="rotate(28 152 40)" opacity="0.7"/>
+      </g>
+    </svg>
+
+    <!-- RATTAN MAT -->
+    <div class="rattan-mat"></div>
+
+    <!-- BOOK MOCKUPS -->
+    <div class="books">
+      <div class="cluster-shadow"></div>
+
+      <div class="book book--left"><div class="book-shadow"></div></div>
+      <div class="book book--right"><div class="book-shadow"></div></div>
+      <div class="book book--center"><div class="book-shadow"></div></div>
+    </div>
+
+  </div>
+</body>
+</html>

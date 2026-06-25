@@ -1,0 +1,16 @@
+{
+  "name": "anim2mp4",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Render a deterministic HTML/CSS/JS animation to an MP4 via headless Chromium + ffmpeg",
+  "main": "capture.js",
+  "bin": {
+    "anim2mp4": "./capture.js"
+  },
+  "scripts": {
+    "example": "node capture.js --html example/animation.html --out example/output.mp4 --duration 4 --fps 30 --width 800 --height 450"
+  },
+  "dependencies": {
+    "playwright": "^1.48.0"
+  }
+}

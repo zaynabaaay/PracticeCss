@@ -53,6 +53,23 @@
 
     // Render an initial frame so the page isn't blank before capture starts.
     window.Anim.setTime(0);
+
+    // Live preview only: when this page is opened in a normal browser
+    // (i.e. NOT being driven frame-by-frame by capture.js), loop setTime()
+    // over wall-clock time so the animation is visible. capture.js sets
+    // window.__ANIM2MP4_CAPTURE__ before any page script runs, so this
+    // loop never runs — and never competes with capture.js — during an
+    // actual export.
+    if (!window.__ANIM2MP4_CAPTURE__) {
+      let start = null;
+      const loop = (now) => {
+        if (start === null) start = now;
+        const t = ((now - start) / 1000) % window.Anim.duration;
+        window.Anim.setTime(t);
+        requestAnimationFrame(loop);
+      };
+      requestAnimationFrame(loop);
+    }
   </script>
 </body>
 </html>

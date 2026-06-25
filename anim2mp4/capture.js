@@ -136,6 +136,13 @@ async function main() {
   });
   const page = await browser.newPage({ viewport: { width, height } });
 
+  // Lets pages tell a live-preview rAF loop (for viewing in a normal
+  // browser) apart from a deterministic capture run, so the two don't
+  // fight over window.Anim.setTime() calls.
+  await page.addInitScript(() => {
+    window.__ANIM2MP4_CAPTURE__ = true;
+  });
+
   if (!args['allow-css-motion']) {
     // Freeze any incidental CSS-driven motion; the page should be moving
     // objects exclusively through window.Anim.setTime(), not real-time

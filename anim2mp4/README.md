@@ -33,6 +33,34 @@ animations/transitions on the page (`animation-play-state: paused`,
 frames. Disable with `--allow-css-motion` if you intentionally rely on CSS
 state (e.g. `:hover`) that isn't covered by `setTime`.
 
+### Live preview in a regular browser
+
+`capture.js` only calls `setTime` explicitly, once per frame — it never
+relies on a real-time loop. So if you open your page directly in a browser
+(e.g. via GitHub Pages), nothing will move unless the page also drives
+itself with `requestAnimationFrame`.
+
+`capture.js` sets `window.__ANIM2MP4_CAPTURE__ = true` via
+`page.addInitScript`, before any of the page's own scripts run. Pages can
+check this flag to add an optional preview loop that only runs when *not*
+being captured, so it never competes with `capture.js`'s frame-by-frame
+calls during an actual export:
+
+```js
+if (!window.__ANIM2MP4_CAPTURE__) {
+  let start = null;
+  const loop = (now) => {
+    if (start === null) start = now;
+    const t = ((now - start) / 1000) % window.Anim.duration;
+    window.Anim.setTime(t);
+    requestAnimationFrame(loop);
+  };
+  requestAnimationFrame(loop);
+}
+```
+
+See `example/animation.html` for this in action.
+
 See `example/animation.html` for a minimal working page.
 
 ## Usage

@@ -1,0 +1,326 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>CSS Art — Mountain Sunset</title>
+<style>
+  :root {
+    --sky-top: #1b1f4b;
+    --sky-mid: #ff7e5f;
+    --sky-bottom: #ffd194;
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  html, body {
+    height: 100%;
+    overflow: hidden;
+    background: #000;
+    font-family: 'Segoe UI', sans-serif;
+  }
+
+  .scene {
+    position: relative;
+    width: 100vw;
+    height: 100vh;
+    overflow: hidden;
+  }
+
+  /* ---------- SKY ---------- */
+  .sky {
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(
+      to bottom,
+      var(--sky-top) 0%,
+      #5b3a8e 22%,
+      #b3568b 42%,
+      var(--sky-mid) 62%,
+      var(--sky-bottom) 100%
+    );
+  }
+
+  /* ---------- STARS ---------- */
+  .stars {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 60%;
+  }
+
+  .stars::before,
+  .stars::after {
+    content: "";
+    position: absolute;
+    top: 0; left: 0;
+    width: 2px;
+    height: 2px;
+    background: transparent;
+    border-radius: 50%;
+    animation: twinkle 4s infinite ease-in-out;
+  }
+
+  .stars::before {
+    box-shadow: 663px 77px #fff, 808px 333px #fff, 98px 37px #fff, 1097px 48px #fff, 748px 298px #fff, 118px 259px #fff, 439px 19px #fff, 176px 222px #fff, 856px 35px #fff, 492px 46px #fff, 1128px 217px #fff, 121px 289px #fff, 253px 114px #fff, 1291px 321px #fff, 1193px 31px #fff, 1181px 299px #fff, 812px 25px #fff, 452px 23px #fff, 1140px 68px #fff, 593px 214px #fff, 295px 276px #fff, 241px 292px #fff, 631px 286px #fff, 1396px 92px #fff, 211px 297px #fff, 1169px 327px #fff, 384px 190px #fff, 199px 280px #fff, 1458px 32px #fff, 1155px 30px #fff, 1267px 105px #fff, 1016px 348px #fff, 1088px 218px #fff, 1591px 160px #fff, 953px 299px #fff, 928px 185px #fff, 613px 127px #fff, 368px 357px #fff, 1597px 124px #fff, 167px 294px #fff, 614px 268px #fff, 1013px 175px #fff, 1493px 229px #fff, 589px 311px #fff, 149px 60px #fff, 1048px 214px #fff, 337px 175px #fff, 311px 250px #fff, 863px 20px #fff, 1368px 39px #fff, 1565px 285px #fff, 1173px 160px #fff, 696px 355px #fff, 717px 304px #fff, 1017px 296px #fff, 934px 35px #fff, 191px 138px #fff, 970px 356px #fff, 1360px 33px #fff, 124px 374px #fff, 1436px 158px #fff, 1325px 295px #fff, 1395px 228px #fff, 582px 366px #fff, 790px 342px #fff, 710px 11px #fff, 945px 181px #fff, 344px 312px #fff, 239px 252px #fff, 120px 111px #fff, 1573px 147px #fff, 264px 378px #fff, 507px 203px #fff, 800px 254px #fff, 165px 85px #fff, 919px 205px #fff, 1125px 142px #fff, 280px 220px #fff, 1126px 142px #fff, 1446px 212px #fff, 734px 349px #fff, 779px 118px #fff, 309px 42px #fff, 360px 77px #fff, 475px 337px #fff, 477px 6px #fff, 993px 301px #fff, 373px 134px #fff, 577px 2px #fff, 298px 214px #fff, 1094px 189px #fff, 1248px 289px #fff, 652px 64px #fff, 1414px 263px #fff, 1264px 335px #fff, 1384px 378px #fff, 110px 233px #fff, 1597px 348px #fff, 1145px 200px #fff, 815px 204px #fff, 807px 53px #fff, 986px 324px #fff, 820px 31px #fff, 390px 34px #fff, 427px 225px #fff, 332px 56px #fff, 696px 307px #fff, 107px 52px #fff, 0px 290px #fff, 309px 274px #fff, 207px 186px #fff, 1256px 13px #fff, 144px 106px #fff, 1257px 192px #fff, 304px 324px #fff, 516px 177px #fff, 1233px 186px #fff, 971px 62px #fff, 236px 249px #fff, 954px 245px #fff, 990px 159px #fff, 175px 73px #fff, 209px 175px #fff, 1516px 135px #fff, 980px 354px #fff, 330px 264px #fff, 47px 105px #fff, 1081px 185px #fff, 300px 353px #fff, 1112px 13px #fff, 1552px 270px #fff, 610px 329px #fff, 186px 356px #fff, 534px 265px #fff, 751px 85px #fff, 728px 114px #fff, 1090px 277px #fff, 1595px 257px #fff, 675px 325px #fff, 456px 313px #fff, 1553px 99px #fff, 490px 205px #fff, 1515px 116px #fff, 409px 265px #fff, 1009px 182px #fff, 1497px 14px #fff, 57px 143px #fff, 967px 132px #fff, 396px 354px #fff, 1239px 176px #fff, 915px 370px #fff, 715px 186px #fff, 164px 112px #fff, 209px 116px #fff, 962px 100px #fff, 691px 104px #fff, 988px 319px #fff, 1249px 0px #fff, 981px 334px #fff, 704px 329px #fff, 173px 338px #fff, 245px 198px #fff, 1457px 102px #fff, 979px 91px #fff, 888px 325px #fff, 680px 44px #fff, 1478px 202px #fff, 948px 205px #fff, 1522px 43px #fff, 1484px 81px #fff, 348px 65px #fff, 56px 77px #fff, 1209px 238px #fff, 1343px 74px #fff, 1252px 305px #fff, 971px 336px #fff, 717px 79px #fff, 1123px 280px #fff, 268px 10px #fff, 29px 371px #fff;
+  }
+
+  .stars::after {
+    box-shadow: 1309px 57px #fff, 51px 140px #fff, 501px 114px #fff, 285px 52px #fff, 1385px 279px #fff, 178px 216px #fff, 65px 15px #fff, 191px 111px #fff, 476px 258px #fff, 1232px 13px #fff, 1149px 101px #fff, 1466px 279px #fff, 859px 112px #fff, 919px 142px #fff, 13px 81px #fff, 1429px 216px #fff, 696px 142px #fff, 318px 110px #fff, 1563px 172px #fff, 209px 47px #fff, 778px 49px #fff, 735px 176px #fff, 1236px 135px #fff, 88px 235px #fff, 1098px 63px #fff, 775px 40px #fff, 1130px 150px #fff, 1287px 185px #fff, 1182px 98px #fff, 1442px 35px #fff, 93px 116px #fff, 1583px 148px #fff, 163px 119px #fff, 206px 194px #fff, 569px 232px #fff, 1301px 186px #fff, 333px 189px #fff, 727px 107px #fff, 1372px 136px #fff, 1437px 36px #fff, 1247px 87px #fff, 1093px 125px #fff, 334px 236px #fff, 777px 138px #fff, 1310px 285px #fff, 449px 166px #fff, 1573px 28px #fff, 469px 16px #fff, 646px 205px #fff, 548px 33px #fff, 432px 290px #fff, 1470px 161px #fff, 435px 255px #fff, 810px 234px #fff, 292px 135px #fff, 285px 126px #fff, 1525px 287px #fff, 1103px 134px #fff, 1529px 299px #fff, 877px 298px #fff, 817px 185px #fff, 449px 70px #fff, 1043px 252px #fff, 186px 24px #fff, 224px 78px #fff, 1285px 81px #fff, 1393px 216px #fff, 1221px 32px #fff, 788px 195px #fff, 1220px 239px #fff, 1083px 128px #fff, 1133px 5px #fff, 1393px 58px #fff, 1396px 274px #fff, 1537px 136px #fff, 1574px 174px #fff, 228px 150px #fff, 890px 80px #fff, 929px 1px #fff, 1478px 134px #fff, 1025px 91px #fff, 1039px 54px #fff, 1280px 152px #fff, 1308px 259px #fff, 1247px 101px #fff, 313px 191px #fff, 1561px 82px #fff, 1104px 271px #fff, 1px 165px #fff, 1000px 9px #fff, 229px 185px #fff, 629px 122px #fff, 118px 123px #fff, 1161px 40px #fff, 175px 248px #fff, 141px 272px #fff, 1568px 64px #fff, 262px 243px #fff, 1125px 84px #fff, 542px 270px #fff, 1242px 216px #fff, 433px 276px #fff, 1546px 102px #fff, 1460px 159px #fff, 817px 191px #fff, 897px 264px #fff, 924px 61px #fff, 507px 115px #fff, 131px 173px #fff, 43px 283px #fff, 471px 112px #fff, 14px 36px #fff, 1449px 30px #fff, 468px 34px #fff, 64px 169px #fff, 145px 263px #fff, 487px 142px #fff, 1370px 248px #fff, 438px 276px #fff, 270px 292px #fff;
+    animation-delay: 2s;
+  }
+
+  @keyframes twinkle {
+    0%, 100% { opacity: 0.3; }
+    50% { opacity: 1; }
+  }
+
+  /* ---------- SUN ---------- */
+  .sun {
+    position: absolute;
+    left: 50%;
+    top: 38%;
+    width: 130px;
+    height: 130px;
+    margin-left: -65px;
+    margin-top: -65px;
+    border-radius: 50%;
+    background: radial-gradient(circle at 35% 35%, #fff6d0, #ffd45e 45%, #ff9a3c 85%);
+    box-shadow:
+      0 0 60px 20px rgba(255, 170, 80, 0.55),
+      0 0 140px 60px rgba(255, 120, 60, 0.35);
+    animation: rise 12s ease-in-out infinite alternate;
+  }
+
+  @keyframes rise {
+    0%   { transform: translateY(8px); }
+    100% { transform: translateY(-8px); }
+  }
+
+  /* ---------- CLOUDS ---------- */
+  .cloud {
+    position: absolute;
+    background: rgba(255, 255, 255, 0.85);
+    border-radius: 100px;
+    filter: blur(0.3px);
+    opacity: 0.8;
+  }
+
+  .cloud::before,
+  .cloud::after {
+    content: "";
+    position: absolute;
+    background: inherit;
+    border-radius: 50%;
+  }
+
+  .cloud-1 {
+    top: 18%; left: -20%;
+    width: 160px; height: 40px;
+    animation: drift 38s linear infinite;
+  }
+  .cloud-1::before { width: 70px; height: 70px; top: -35px; left: 20px; }
+  .cloud-1::after  { width: 90px; height: 60px; top: -25px; left: 80px; }
+
+  .cloud-2 {
+    top: 28%; left: -30%;
+    width: 120px; height: 32px;
+    opacity: 0.6;
+    animation: drift 52s linear infinite;
+    animation-delay: -10s;
+  }
+  .cloud-2::before { width: 55px; height: 55px; top: -28px; left: 15px; }
+  .cloud-2::after  { width: 65px; height: 45px; top: -18px; left: 60px; }
+
+  .cloud-3 {
+    top: 10%; left: -25%;
+    width: 200px; height: 45px;
+    opacity: 0.5;
+    animation: drift 65s linear infinite;
+    animation-delay: -25s;
+  }
+  .cloud-3::before { width: 80px; height: 80px; top: -40px; left: 30px; }
+  .cloud-3::after  { width: 100px; height: 65px; top: -28px; left: 100px; }
+
+  @keyframes drift {
+    from { transform: translateX(0); }
+    to   { transform: translateX(140vw); }
+  }
+
+  /* ---------- BIRDS ---------- */
+  .bird {
+    position: absolute;
+    width: 24px;
+    height: 12px;
+    opacity: 0.75;
+    animation: fly 16s linear infinite;
+  }
+  .bird::before,
+  .bird::after {
+    content: "";
+    position: absolute;
+    top: 0;
+    width: 12px;
+    height: 12px;
+    border-top: 2px solid #2b2b3a;
+    border-radius: 50%;
+  }
+  .bird::before { left: 0; border-right: 2px solid transparent; transform: rotate(20deg); }
+  .bird::after  { left: 10px; border-left: 2px solid transparent; transform: rotate(-20deg); }
+
+  .bird-1 { top: 20%; left: -5%; animation-duration: 18s; }
+  .bird-2 { top: 23%; left: -8%; animation-duration: 18s; animation-delay: 0.6s; }
+  .bird-3 { top: 17%; left: -10%; animation-duration: 18s; animation-delay: 1.1s; }
+  .bird-4 { top: 32%; left: -6%; animation-duration: 24s; animation-delay: 6s; }
+  .bird-5 { top: 35%; left: -9%; animation-duration: 24s; animation-delay: 6.5s; }
+
+  @keyframes fly {
+    from { transform: translateX(0) translateY(0); }
+    50%  { transform: translateX(60vw) translateY(-18px); }
+    to   { transform: translateX(120vw) translateY(0); }
+  }
+
+  /* ---------- MOUNTAINS ---------- */
+  .mountains {
+    position: absolute;
+    bottom: 30%;
+    left: 0;
+    width: 100%;
+    height: 45%;
+  }
+
+  .mountain {
+    position: absolute;
+    bottom: 0;
+    width: 100%;
+    height: 100%;
+  }
+
+  .mountain-back {
+    background: #6c5c8f;
+    clip-path: polygon(0% 100%, 0% 60%, 12% 40%, 22% 55%, 33% 25%, 45% 50%, 58% 30%, 70% 58%, 82% 35%, 92% 55%, 100% 45%, 100% 100%);
+    opacity: 0.75;
+  }
+
+  .mountain-mid {
+    background: #4a3d68;
+    clip-path: polygon(0% 100%, 0% 75%, 15% 50%, 28% 68%, 40% 38%, 53% 62%, 66% 42%, 78% 65%, 90% 48%, 100% 65%, 100% 100%);
+    opacity: 0.85;
+  }
+
+  .mountain-front {
+    background: #2c2342;
+    clip-path: polygon(0% 100%, 0% 85%, 10% 60%, 24% 78%, 36% 52%, 50% 80%, 64% 55%, 78% 82%, 90% 60%, 100% 80%, 100% 100%);
+  }
+
+  .snowcap {
+    position: absolute;
+    width: 60px;
+    height: 26px;
+    background: linear-gradient(to bottom, #fff, rgba(255,255,255,0));
+    clip-path: polygon(50% 0%, 100% 100%, 0% 100%);
+  }
+  .snowcap.s1 { top: 36%; left: 31%; transform: rotate(2deg) scale(0.7); }
+  .snowcap.s2 { top: 28%; left: 55%; transform: rotate(-3deg) scale(0.55); }
+  .snowcap.s3 { top: 24%; left: 78%; transform: rotate(4deg) scale(0.45); }
+
+  /* ---------- WATER ---------- */
+  .water {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    width: 100%;
+    height: 30%;
+    background: linear-gradient(to bottom, #1c1640, #0a0820);
+    overflow: hidden;
+  }
+
+  .water::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(
+      to bottom,
+      rgba(255, 170, 90, 0.35),
+      rgba(255, 120, 90, 0.1) 40%,
+      transparent 70%
+    );
+  }
+
+  .ripple {
+    position: absolute;
+    left: 0;
+    width: 100%;
+    height: 2px;
+    background: rgba(255, 220, 180, 0.25);
+    animation: shimmer 5s ease-in-out infinite;
+  }
+  .ripple:nth-child(1) { top: 15%; animation-delay: 0s; }
+  .ripple:nth-child(2) { top: 35%; animation-delay: 1.2s; }
+  .ripple:nth-child(3) { top: 55%; animation-delay: 2.4s; }
+  .ripple:nth-child(4) { top: 75%; animation-delay: 0.6s; }
+
+  @keyframes shimmer {
+    0%, 100% { opacity: 0.15; transform: scaleX(1); }
+    50%      { opacity: 0.5; transform: scaleX(1.03); }
+  }
+
+  /* ---------- VIGNETTE / CAPTION ---------- */
+  .vignette {
+    position: absolute;
+    inset: 0;
+    box-shadow: inset 0 0 160px 40px rgba(0, 0, 0, 0.55);
+    pointer-events: none;
+  }
+
+  .caption {
+    position: absolute;
+    bottom: 14px;
+    left: 0;
+    width: 100%;
+    text-align: center;
+    color: rgba(255, 255, 255, 0.55);
+    font-size: 13px;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    pointer-events: none;
+  }
+</style>
+</head>
+<body>
+  <div class="scene">
+    <div class="sky"></div>
+    <div class="stars"></div>
+
+    <div class="cloud cloud-3"></div>
+    <div class="cloud cloud-2"></div>
+    <div class="sun"></div>
+    <div class="cloud cloud-1"></div>
+
+    <div class="bird bird-1"></div>
+    <div class="bird bird-2"></div>
+    <div class="bird bird-3"></div>
+    <div class="bird bird-4"></div>
+    <div class="bird bird-5"></div>
+
+    <div class="mountains">
+      <div class="mountain mountain-back"></div>
+      <div class="mountain mountain-mid"></div>
+      <div class="mountain mountain-front"></div>
+      <div class="snowcap s1"></div>
+      <div class="snowcap s2"></div>
+      <div class="snowcap s3"></div>
+    </div>
+
+    <div class="water">
+      <div class="ripple"></div>
+      <div class="ripple"></div>
+      <div class="ripple"></div>
+      <div class="ripple"></div>
+    </div>
+
+    <div class="vignette"></div>
+    <div class="caption">pure css &middot; no images</div>
+  </div>
+</body>
+</html>

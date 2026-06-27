@@ -1,0 +1,261 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1600 960" width="1600" height="960">
+  <defs>
+    <linearGradient id="sky" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%"  stop-color="#1f8fa0"/>
+      <stop offset="28%" stop-color="#5fb8b8"/>
+      <stop offset="55%" stop-color="#a9d9b2"/>
+      <stop offset="78%" stop-color="#e3eeb0"/>
+      <stop offset="100%" stop-color="#fdf2b8"/>
+    </linearGradient>
+
+    <linearGradient id="rayL" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#fff6cf" stop-opacity="0.55"/>
+      <stop offset="100%" stop-color="#fff6cf" stop-opacity="0"/>
+    </linearGradient>
+
+    <linearGradient id="river" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%"  stop-color="#7fe0e6"/>
+      <stop offset="55%" stop-color="#3fb9c9"/>
+      <stop offset="100%" stop-color="#1f93ac"/>
+    </linearGradient>
+
+    <radialGradient id="hillBack" cx="50%" cy="0%" r="100%">
+      <stop offset="0%" stop-color="#9fc6a8"/>
+      <stop offset="100%" stop-color="#7fb091"/>
+    </radialGradient>
+
+    <linearGradient id="grass" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#8fcf73"/>
+      <stop offset="100%" stop-color="#5fb95a"/>
+    </linearGradient>
+
+    <!-- reusable symbols -->
+    <g id="blossom">
+      <ellipse cx="0" cy="40" rx="10" ry="46" fill="#7a5a42"/>
+      <g fill="#f8b8cf">
+        <circle cx="-34" cy="-30" r="26"/>
+        <circle cx="0"   cy="-52" r="30"/>
+        <circle cx="34"  cy="-28" r="26"/>
+        <circle cx="-18" cy="-6"  r="24"/>
+        <circle cx="20"  cy="-4"  r="24"/>
+        <circle cx="0"   cy="-22" r="22"/>
+      </g>
+      <g fill="#fdd7e4" opacity="0.7">
+        <circle cx="-10" cy="-40" r="10"/>
+        <circle cx="14" cy="-34" r="9"/>
+      </g>
+    </g>
+
+    <g id="roundTree">
+      <ellipse cx="0" cy="34" rx="8" ry="38" fill="#6b4f3a"/>
+      <g fill="#4f9d4a">
+        <circle cx="-26" cy="-18" r="22"/>
+        <circle cx="0"   cy="-36" r="26"/>
+        <circle cx="26"  cy="-16" r="22"/>
+        <circle cx="0"   cy="-8"  r="22"/>
+      </g>
+      <circle cx="-8" cy="-30" r="9" fill="#6fbb5e" opacity="0.7"/>
+    </g>
+
+    <g id="cypress">
+      <rect x="-5" y="20" width="10" height="20" fill="#5c4632"/>
+      <path d="M0 -90 C 26 -50 22 -10 22 30 L -22 30 C -22 -10 -26 -50 0 -90 Z" fill="#2f6b46"/>
+      <path d="M0 -78 C 16 -45 14 -15 14 18 L -14 18 C -14 -15 -16 -45 0 -78 Z" fill="#3a8252" opacity="0.85"/>
+    </g>
+
+    <g id="flowerCluster">
+      <g>
+        <circle cx="-16" cy="2"  r="9"  fill="#f49bc1"/>
+        <circle cx="0"   cy="-6" r="10" fill="#9b7fdc"/>
+        <circle cx="16"  cy="2"  r="9"  fill="#f7c948"/>
+        <circle cx="-6"  cy="10" r="8"  fill="#ef7b4d"/>
+        <circle cx="9"   cy="12" r="8"  fill="#ffffff"/>
+        <circle cx="2"   cy="-2" r="5"  fill="#fff7d6"/>
+      </g>
+    </g>
+
+    <g id="sparkle">
+      <path d="M0 -9 L2.4 -2.4 L9 0 L2.4 2.4 L0 9 L-2.4 2.4 L-9 0 L-2.4 -2.4 Z" fill="#ffffff" opacity="0.9"/>
+    </g>
+
+    <g id="stone">
+      <ellipse cx="0" cy="0" rx="13" ry="8" fill="#cfc8b6" stroke="#b6ad98" stroke-width="2"/>
+    </g>
+  </defs>
+
+  <!-- SKY -->
+  <rect x="0" y="0" width="1600" height="960" fill="url(#sky)"/>
+
+  <!-- SUN RAYS -->
+  <polygon points="-50,-50 380,-50 60,560 -50,420" fill="url(#rayL)"/>
+  <polygon points="1650,-50 1220,-50 1540,560 1650,420" fill="url(#rayL)"/>
+  <polygon points="650,-80 950,-80 1020,480 600,480" fill="#fff6cf" opacity="0.18"/>
+
+  <!-- CLOUDS -->
+  <g fill="#ffffff" opacity="0.9">
+    <g transform="translate(160,150)">
+      <ellipse cx="0" cy="0" rx="80" ry="26"/>
+      <circle cx="-40" cy="-14" r="28"/>
+      <circle cx="10" cy="-22" r="32"/>
+      <circle cx="55" cy="-10" r="24"/>
+    </g>
+    <g transform="translate(520,90) scale(0.8)" opacity="0.85">
+      <ellipse cx="0" cy="0" rx="80" ry="26"/>
+      <circle cx="-40" cy="-14" r="28"/>
+      <circle cx="10" cy="-22" r="32"/>
+      <circle cx="55" cy="-10" r="24"/>
+    </g>
+    <g transform="translate(1180,130) scale(1.1)">
+      <ellipse cx="0" cy="0" rx="80" ry="26"/>
+      <circle cx="-40" cy="-14" r="28"/>
+      <circle cx="10" cy="-22" r="32"/>
+      <circle cx="55" cy="-10" r="24"/>
+    </g>
+    <g transform="translate(1420,210) scale(0.7)" opacity="0.8">
+      <ellipse cx="0" cy="0" rx="80" ry="26"/>
+      <circle cx="-40" cy="-14" r="28"/>
+      <circle cx="10" cy="-22" r="32"/>
+      <circle cx="55" cy="-10" r="24"/>
+    </g>
+    <g transform="translate(60,330) scale(0.6)" opacity="0.7">
+      <ellipse cx="0" cy="0" rx="80" ry="26"/>
+      <circle cx="-40" cy="-14" r="28"/>
+      <circle cx="10" cy="-22" r="32"/>
+    </g>
+  </g>
+
+  <!-- MOUNTAINS / HILLS -->
+  <path d="M0,470 C150,400 300,440 430,400 C560,360 650,420 800,400
+           C950,380 1050,430 1200,400 C1350,370 1480,420 1600,400
+           L1600,560 L0,560 Z" fill="#8fc09b" opacity="0.85"/>
+  <path d="M0,510 C180,460 320,500 470,470 C620,440 720,490 860,470
+           C1020,450 1120,500 1280,470 C1420,450 1520,490 1600,470
+           L1600,580 L0,580 Z" fill="#79b187" opacity="0.9"/>
+
+  <!-- BASE MEADOW -->
+  <rect x="0" y="520" width="1600" height="440" fill="url(#grass)"/>
+
+  <!-- RIVER (stone border + water) -->
+  <path id="riverPath" d="M760,500
+           C 740,560 660,600 660,660
+           C 660,720 760,740 800,800
+           C 840,860 820,920 800,960"
+        fill="none" stroke="#cfc8b6" stroke-width="250" stroke-linecap="round"/>
+  <path d="M760,500
+           C 740,560 660,600 660,660
+           C 660,720 760,740 800,800
+           C 840,860 820,920 800,960"
+        fill="none" stroke="url(#river)" stroke-width="200" stroke-linecap="round"/>
+  <path d="M760,500
+           C 745,555 685,600 680,655
+           C 676,705 760,730 795,790"
+        fill="none" stroke="#d9fbff" stroke-width="14" stroke-linecap="round" opacity="0.55"/>
+
+  <!-- ISLAND where the river bends -->
+  <ellipse cx="755" cy="535" rx="120" ry="62" fill="#6fc262"/>
+  <ellipse cx="755" cy="535" rx="120" ry="62" fill="none" stroke="#cfc8b6" stroke-width="12"/>
+
+  <!-- BRIDGE crossing the upper river -->
+  <g transform="translate(615,505) rotate(-12)">
+    <path d="M-60,16 C -60,-26 60,-26 60,16" fill="none" stroke="#b9b2a3" stroke-width="15"/>
+    <rect x="-68" y="12" width="18" height="24" fill="#a8a193"/>
+    <rect x="50" y="12" width="18" height="24" fill="#a8a193"/>
+    <rect x="-70" y="4" width="140" height="9" fill="#cfc8b6"/>
+  </g>
+
+  <!-- FLOWER BEDS far edges -->
+  <g>
+    <!-- bottom-left bursts -->
+    <use href="#flowerCluster" transform="translate(70,860) scale(1.6)"/>
+    <use href="#flowerCluster" transform="translate(150,900) scale(1.8)"/>
+    <use href="#flowerCluster" transform="translate(40,930) scale(1.4)"/>
+    <use href="#flowerCluster" transform="translate(220,860) scale(1.3)"/>
+    <use href="#flowerCluster" transform="translate(300,810) scale(1.1)"/>
+
+    <!-- bottom-right bursts -->
+    <use href="#flowerCluster" transform="translate(1460,840) scale(1.5)"/>
+    <use href="#flowerCluster" transform="translate(1530,890) scale(1.3)"/>
+    <use href="#flowerCluster" transform="translate(1380,880) scale(1.2)"/>
+  </g>
+
+  <!-- mid-river bank flowers -->
+  <g>
+    <use href="#flowerCluster" transform="translate(560,640) scale(0.9)"/>
+    <use href="#flowerCluster" transform="translate(610,690) scale(1.0)"/>
+    <use href="#flowerCluster" transform="translate(950,650) scale(0.9)"/>
+    <use href="#flowerCluster" transform="translate(990,700) scale(1.0)"/>
+    <use href="#flowerCluster" transform="translate(880,760) scale(0.8)"/>
+  </g>
+
+  <!-- TREES: far blossoms left -->
+  <use href="#blossom" transform="translate(120,640) scale(1.7)"/>
+  <use href="#blossom" transform="translate(260,600) scale(1.1)"/>
+  <use href="#roundTree" transform="translate(330,640) scale(1.0)"/>
+  <use href="#blossom" transform="translate(60,760) scale(1.0)"/>
+
+  <!-- mid-left trees near river bend -->
+  <use href="#blossom" transform="translate(430,560) scale(0.9)"/>
+  <use href="#roundTree" transform="translate(480,600) scale(0.8)"/>
+  <use href="#cypress" transform="translate(660,540) scale(0.9)"/>
+
+  <!-- island trees -->
+  <use href="#cypress" transform="translate(720,480) scale(1.0)"/>
+  <use href="#cypress" transform="translate(790,470) scale(0.85)"/>
+  <use href="#roundTree" transform="translate(800,520) scale(0.9)"/>
+
+  <!-- mid-right trees -->
+  <use href="#blossom" transform="translate(950,560) scale(0.9)"/>
+  <use href="#roundTree" transform="translate(1010,600) scale(0.8)"/>
+  <use href="#cypress" transform="translate(1080,540) scale(0.8)"/>
+
+  <!-- far right blossoms -->
+  <use href="#roundTree" transform="translate(1240,610) scale(1.0)"/>
+  <use href="#blossom" transform="translate(1320,580) scale(1.2)"/>
+  <use href="#roundTree" transform="translate(1430,630) scale(0.9)"/>
+  <use href="#blossom" transform="translate(1500,650) scale(0.9)"/>
+
+  <!-- STONE STEPPING PATH on right meadow -->
+  <g fill="#cfc8b6">
+    <ellipse cx="1180" cy="720" rx="22" ry="12"/>
+    <ellipse cx="1220" cy="755" rx="22" ry="12"/>
+    <ellipse cx="1250" cy="795" rx="22" ry="12"/>
+    <ellipse cx="1270" cy="838" rx="22" ry="12"/>
+  </g>
+
+  <!-- PERGOLA + STAIRS bottom-right -->
+  <g transform="translate(1440,720)">
+    <!-- stairs -->
+    <g fill="#b9b2a3">
+      <rect x="20" y="170" width="140" height="20"/>
+      <rect x="35" y="145" width="120" height="20"/>
+      <rect x="50" y="120" width="100" height="20"/>
+      <rect x="65" y="95"  width="80"  height="20"/>
+    </g>
+    <!-- pergola posts -->
+    <g fill="#8a6a4a">
+      <rect x="40" y="-40" width="12" height="100"/>
+      <rect x="150" y="-40" width="12" height="100"/>
+      <rect x="30" y="-50" width="142" height="14"/>
+    </g>
+    <!-- climbing flowers -->
+    <g fill="#f1a8c8">
+      <circle cx="46" cy="-20" r="10"/>
+      <circle cx="60" cy="-40" r="9"/>
+      <circle cx="156" cy="-22" r="10"/>
+      <circle cx="140" cy="-44" r="9"/>
+      <circle cx="100" cy="-46" r="10"/>
+    </g>
+  </g>
+
+  <!-- water sparkles -->
+  <g>
+    <use href="#sparkle" transform="translate(770,560)"/>
+    <use href="#sparkle" transform="translate(700,640) scale(1.3)"/>
+    <use href="#sparkle" transform="translate(760,700) scale(0.8)"/>
+    <use href="#sparkle" transform="translate(800,760) scale(1.1)"/>
+    <use href="#sparkle" transform="translate(790,840) scale(1.4)"/>
+    <use href="#sparkle" transform="translate(810,900) scale(0.9)"/>
+    <use href="#sparkle" transform="translate(300,455) scale(0.9)"/>
+    <use href="#sparkle" transform="translate(1200,450) scale(1.0)"/>
+  </g>
+</svg>

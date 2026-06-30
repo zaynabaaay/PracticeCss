@@ -1,0 +1,607 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Bruno Simon–Inspired Portfolio</title>
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body { background: #1d4a8f; overflow: hidden; font-family: 'Segoe UI', sans-serif; }
+  canvas { display: block; }
+
+  #loading {
+    position: fixed; inset: 0;
+    background: #1d4a8f;
+    display: flex; flex-direction: column;
+    align-items: center; justify-content: center;
+    color: #fff; z-index: 100;
+    transition: opacity 0.6s ease;
+  }
+  #loading h1 { font-size: 2rem; font-weight: 300; letter-spacing: 6px; margin-bottom: 24px; }
+  #loading .bar-wrap { width: 200px; height: 4px; background: rgba(255,255,255,.2); border-radius: 2px; }
+  #loading .bar { height: 100%; background: #fff; border-radius: 2px; width: 0%; transition: width .4s; }
+  #loading.hidden { opacity: 0; pointer-events: none; }
+
+  #hint {
+    position: fixed; bottom: 28px; left: 50%; transform: translateX(-50%);
+    color: rgba(255,255,255,.7); font-size: 13px; letter-spacing: 2px; text-transform: uppercase;
+    pointer-events: none; transition: opacity 1s ease;
+  }
+  #hint.hidden { opacity: 0; }
+
+  #info-panel {
+    position: fixed; top: 0; right: 0; bottom: 0;
+    width: 340px; background: rgba(10,20,50,.92);
+    color: #fff; padding: 48px 32px;
+    transform: translateX(100%); transition: transform 0.4s cubic-bezier(.4,0,.2,1);
+    overflow-y: auto; z-index: 50;
+    border-left: 1px solid rgba(255,255,255,.08);
+  }
+  #info-panel.open { transform: translateX(0); }
+  #info-panel .close { position: absolute; top: 20px; right: 20px; background: none; border: none;
+    color: rgba(255,255,255,.6); font-size: 22px; cursor: pointer; padding: 4px 8px; }
+  #info-panel .close:hover { color: #fff; }
+  #info-panel h2 { font-size: 1.4rem; font-weight: 300; letter-spacing: 3px; margin-bottom: 8px; }
+  #info-panel .tag { display: inline-block; background: rgba(255,255,255,.12); border-radius: 3px;
+    font-size: 11px; padding: 2px 8px; letter-spacing: 1px; margin-bottom: 20px; }
+  #info-panel p { font-size: 13px; line-height: 1.8; color: rgba(255,255,255,.7); margin-bottom: 16px; }
+  #info-panel a { color: #7eb8ff; text-decoration: none; font-size: 13px; }
+  #info-panel a:hover { text-decoration: underline; }
+  #info-panel .divider { border: none; border-top: 1px solid rgba(255,255,255,.1); margin: 20px 0; }
+
+  #crosshair {
+    position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%);
+    width: 16px; height: 16px; pointer-events: none; opacity: 0;
+  }
+  #crosshair::before, #crosshair::after { content: ''; position: absolute; background: rgba(255,255,255,.6); }
+  #crosshair::before { top: 7px; left: 0; right: 0; height: 2px; }
+  #crosshair::after { left: 7px; top: 0; bottom: 0; width: 2px; }
+</style>
+</head>
+<body>
+
+<div id="loading">
+  <h1>PORTFOLIO</h1>
+  <div class="bar-wrap"><div class="bar" id="prog-bar"></div></div>
+</div>
+
+<div id="hint">Arrow keys / WASD to drive · Click signs to explore</div>
+
+<div id="crosshair"></div>
+
+<div id="info-panel">
+  <button class="close" id="panel-close">✕</button>
+  <div id="panel-content"></div>
+</div>
+
+<script type="importmap">
+{
+  "imports": {
+    "three": "https://cdn.jsdelivr.net/npm/three@0.163.0/build/three.module.js",
+    "three/addons/": "https://cdn.jsdelivr.net/npm/three@0.163.0/examples/jsm/"
+  }
+}
+</script>
+
+<script type="module">
+import * as THREE from 'three';
+
+// ─── Scene ───────────────────────────────────────────────────────
+const renderer = new THREE.WebGLRenderer({ antialias: true });
+renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+renderer.setSize(window.innerWidth, window.innerHeight);
+renderer.shadowMap.enabled = true;
+renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+renderer.toneMapping = THREE.ACESFilmicToneMapping;
+renderer.toneMappingExposure = 1.2;
+document.body.appendChild(renderer.domElement);
+
+const scene = new THREE.Scene();
+scene.background = new THREE.Color(0x87ceeb);
+scene.fog = new THREE.Fog(0x87ceeb, 30, 90);
+
+const camera = new THREE.PerspectiveCamera(50, window.innerWidth / window.innerHeight, 0.1, 200);
+camera.position.set(0, 8, 14);
+camera.lookAt(0, 0, 0);
+
+// ─── Lights ──────────────────────────────────────────────────────
+const ambient = new THREE.AmbientLight(0xffffff, 0.6);
+scene.add(ambient);
+
+const sun = new THREE.DirectionalLight(0xfff3d0, 2.5);
+sun.position.set(15, 25, 10);
+sun.castShadow = true;
+sun.shadow.mapSize.set(2048, 2048);
+sun.shadow.camera.near = 0.1;
+sun.shadow.camera.far = 100;
+sun.shadow.camera.left = sun.shadow.camera.bottom = -40;
+sun.shadow.camera.right = sun.shadow.camera.top = 40;
+sun.shadow.bias = -0.001;
+scene.add(sun);
+
+// ─── Materials ───────────────────────────────────────────────────
+const mat = (color, rough = 0.8) => new THREE.MeshStandardMaterial({ color, roughness: rough, metalness: 0 });
+
+const groundMat = mat(0x4caf73);
+const roadMat = mat(0x607080, 0.9);
+const roadLineMat = mat(0xffffff, 1);
+const treeTrunkMat = mat(0x8b5a2b);
+const treeLeafMat = mat(0x2d8a45);
+const treeLeafDarkMat = mat(0x1f6e34);
+const houseMat = mat(0xf5e0c8);
+const roofMat = mat(0xc0392b);
+const chimneyMat = mat(0x8b4513);
+const windowMat = mat(0x9ad4ee, 0.2);
+const doorMat = mat(0x6b3a2a);
+const signMat = mat(0xffd166);
+const signPostMat = mat(0xc0b090, 0.7);
+const rockMat = mat(0x9e9ea0, 0.95);
+const flowerMat = [mat(0xff6b9d), mat(0xffcc00), mat(0xff8533), mat(0xcc44ff)];
+const whiteMat = mat(0xffffff, 1);
+const carBodyMat = mat(0xff3333, 0.4);
+const carRoofMat = mat(0xcc2222, 0.4);
+const carWheelMat = mat(0x222222, 0.9);
+const carHubMat = mat(0xcccccc, 0.3);
+const carGlassMat = new THREE.MeshStandardMaterial({ color: 0xaaddff, roughness: 0.1, metalness: 0.1, transparent: true, opacity: 0.5 });
+const carHeadlightMat = new THREE.MeshStandardMaterial({ color: 0xffffcc, roughness: 0.1, emissive: 0xffffcc, emissiveIntensity: 0.4 });
+
+// ─── Helpers ─────────────────────────────────────────────────────
+function box(w, h, d, material, x = 0, y = 0, z = 0, rx = 0, ry = 0, rz = 0) {
+  const m = new THREE.Mesh(new THREE.BoxGeometry(w, h, d), material);
+  m.position.set(x, y, z);
+  m.rotation.set(rx, ry, rz);
+  m.castShadow = true;
+  m.receiveShadow = true;
+  return m;
+}
+
+function cyl(rt, rb, h, seg, material, x = 0, y = 0, z = 0) {
+  const m = new THREE.Mesh(new THREE.CylinderGeometry(rt, rb, h, seg), material);
+  m.position.set(x, y, z);
+  m.castShadow = true;
+  m.receiveShadow = true;
+  return m;
+}
+
+function cone(r, h, seg, material, x = 0, y = 0, z = 0) {
+  const m = new THREE.Mesh(new THREE.ConeGeometry(r, h, seg), material);
+  m.position.set(x, y, z);
+  m.castShadow = true;
+  m.receiveShadow = true;
+  return m;
+}
+
+function sphere(r, seg, material, x = 0, y = 0, z = 0) {
+  const m = new THREE.Mesh(new THREE.SphereGeometry(r, seg, seg), material);
+  m.position.set(x, y, z);
+  m.castShadow = true;
+  m.receiveShadow = true;
+  return m;
+}
+
+// ─── Ground ──────────────────────────────────────────────────────
+const ground = new THREE.Mesh(
+  new THREE.PlaneGeometry(120, 120, 1, 1),
+  groundMat
+);
+ground.rotation.x = -Math.PI / 2;
+ground.receiveShadow = true;
+scene.add(ground);
+
+// ─── Roads ───────────────────────────────────────────────────────
+function addRoad(x, z, w, d, ry = 0) {
+  const r = box(w, 0.05, d, roadMat, x, 0.02, z);
+  r.rotation.y = ry;
+  r.receiveShadow = true;
+  scene.add(r);
+  // dashes
+  if (ry === 0) {
+    for (let i = -d / 2 + 1.5; i < d / 2; i += 3) {
+      const dash = box(0.15, 0.06, 0.9, roadLineMat, x, 0.04, z + i);
+      scene.add(dash);
+    }
+  } else {
+    for (let i = -w / 2 + 1.5; i < w / 2; i += 3) {
+      const dash = box(0.9, 0.06, 0.15, roadLineMat, x + i, 0.04, z);
+      scene.add(dash);
+    }
+  }
+}
+
+// Main cross roads
+addRoad(0, 0, 3.5, 60);   // vertical road
+addRoad(0, 0, 60, 3.5, Math.PI / 2); // horizontal road (using width/depth swap)
+
+// ─── Tree factory ────────────────────────────────────────────────
+function addTree(x, z, scale = 1, variant = 0) {
+  const g = new THREE.Group();
+  const trunkH = 0.8 * scale;
+  const trunk = cyl(0.12 * scale, 0.16 * scale, trunkH, 6, treeTrunkMat, 0, trunkH / 2, 0);
+  g.add(trunk);
+
+  if (variant === 0) {
+    // round fluffy tree
+    const canopy = sphere(0.7 * scale, 7, treeLeafMat, 0, trunkH + 0.45 * scale, 0);
+    const canopy2 = sphere(0.5 * scale, 7, treeLeafDarkMat, 0.3 * scale, trunkH + 0.6 * scale, 0);
+    g.add(canopy, canopy2);
+  } else {
+    // cone pine
+    g.add(cone(0.6 * scale, 1.2 * scale, 7, treeLeafDarkMat, 0, trunkH + 0.5 * scale, 0));
+    g.add(cone(0.45 * scale, 0.9 * scale, 7, treeLeafMat, 0, trunkH + 0.95 * scale, 0));
+    g.add(cone(0.3 * scale, 0.7 * scale, 7, treeLeafDarkMat, 0, trunkH + 1.3 * scale, 0));
+  }
+
+  g.position.set(x, 0, z);
+  g.rotation.y = Math.random() * Math.PI * 2;
+  scene.add(g);
+  return g;
+}
+
+// Scatter trees
+const treePositions = [
+  [6,6,1,0],[8,3,0.9,1],[10,8,1.1,0],[5,12,0.8,1],[12,5,1,0],
+  [-6,6,1,1],[-8,3,0.9,0],[-10,8,1.1,1],[-5,12,0.8,0],[-12,5,1,1],
+  [6,-6,1,0],[8,-3,0.9,1],[10,-8,1.1,0],[5,-12,0.8,1],
+  [-6,-6,1,1],[-8,-3,0.9,0],[-10,-8,1.1,1],[-5,-12,0.8,0],
+  [15,15,1.2,0],[15,-15,1.2,1],[-15,15,1.2,1],[-15,-15,1.2,0],
+  [18,8,1,0],[18,-8,0.9,1],[8,18,1.1,0],[-8,18,0.9,1],
+  [20,0,1,0],[0,20,0.9,1],[-20,0,1.1,0],[0,-20,0.8,1],
+  [22,12,1,0],[22,-12,0.9,1],[-22,12,1.1,0],[-22,-12,0.8,1],
+];
+treePositions.forEach(([x, z, s, v]) => addTree(x, z, s, v));
+
+// ─── Houses ──────────────────────────────────────────────────────
+function addHouse(x, z, ry = 0, color = 0xf5e0c8, roofColor = 0xc0392b) {
+  const g = new THREE.Group();
+  const hMat = mat(color);
+  const rMat = mat(roofColor);
+
+  // main body
+  const body = box(3.5, 2.4, 3, hMat, 0, 1.2, 0);
+  g.add(body);
+
+  // roof (prism via box rotated — approximate with CylinderGeometry)
+  const roofGeo = new THREE.CylinderGeometry(0, 2.4, 1.8, 4, 1);
+  const roofMesh = new THREE.Mesh(roofGeo, rMat);
+  roofMesh.position.set(0, 2.4 + 0.9, 0);
+  roofMesh.rotation.y = Math.PI / 4;
+  roofMesh.castShadow = true;
+  g.add(roofMesh);
+
+  // chimney
+  g.add(box(0.3, 1, 0.3, chimneyMat, 0.8, 2.4 + 0.8, -0.6));
+
+  // door
+  g.add(box(0.7, 1.1, 0.1, doorMat, 0, 0.55, 1.56));
+
+  // windows
+  g.add(box(0.7, 0.6, 0.1, windowMat, -1.1, 1.4, 1.56));
+  g.add(box(0.7, 0.6, 0.1, windowMat, 1.1, 1.4, 1.56));
+
+  g.position.set(x, 0, z);
+  g.rotation.y = ry;
+  scene.add(g);
+  return g;
+}
+
+addHouse(9, -9, 0.4, 0xe8d5b0, 0x2980b9);
+addHouse(-9, -9, -0.4, 0xfce4d6, 0x8e44ad);
+addHouse(9, 9, 2.8, 0xd5e8d0, 0xe67e22);
+addHouse(-9, 9, -2.8, 0xfff0d0, 0x27ae60);
+
+// ─── Rocks ───────────────────────────────────────────────────────
+function addRock(x, z, s = 1) {
+  const g = new THREE.Group();
+  [
+    [0, s * 0.3, 0, s * 0.55, s * 0.5, s * 0.45],
+    [s * 0.2, s * 0.2, s * 0.15, s * 0.35, s * 0.35, s * 0.35],
+    [-s * 0.15, s * 0.15, -s * 0.1, s * 0.3, s * 0.28, s * 0.3],
+  ].forEach(([rx, ry, rz, w, h, d]) => {
+    const m = box(w, h, d, rockMat, rx, ry, rz, Math.random(), Math.random(), Math.random());
+    g.add(m);
+  });
+  g.position.set(x, 0, z);
+  scene.add(g);
+}
+[[-5,5],[-5,-5],[5,5],[5,-5],[13,13],[-13,13],[13,-13],[-13,-13]].forEach(([x,z]) => addRock(x, z, 0.4 + Math.random() * 0.4));
+
+// ─── Flowers ─────────────────────────────────────────────────────
+for (let i = 0; i < 60; i++) {
+  const angle = Math.random() * Math.PI * 2;
+  const dist = 4 + Math.random() * 18;
+  const x = Math.cos(angle) * dist;
+  const z = Math.sin(angle) * dist;
+  // avoid roads
+  if (Math.abs(x) < 2.5 || Math.abs(z) < 2.5) continue;
+  const fMat = flowerMat[Math.floor(Math.random() * flowerMat.length)];
+  const stem = cyl(0.02, 0.02, 0.3, 4, mat(0x3a8a3a), x, 0.15, z);
+  const bloom = sphere(0.1, 5, fMat, x, 0.35, z);
+  scene.add(stem, bloom);
+}
+
+// ─── Interactive Signs ───────────────────────────────────────────
+const panels = [
+  {
+    id: 'about',
+    label: 'ABOUT',
+    pos: [3.5, 0, -8],
+    color: 0xffd166,
+    content: `
+      <h2>ABOUT ME</h2>
+      <span class="tag">Creative Developer</span>
+      <p>Inspired by Bruno Simon's iconic portfolio, this little world was built with Three.js and pure CSS. Drive the red car around and explore!</p>
+      <p>I love building interactive web experiences that blend creative design with solid engineering.</p>
+      <hr class="divider">
+      <p>Skills: Three.js · CSS · WebGL · JavaScript · React</p>
+    `
+  },
+  {
+    id: 'work',
+    label: 'WORK',
+    pos: [-3.5, 0, -8],
+    color: 0xff6b9d,
+    content: `
+      <h2>SELECTED WORK</h2>
+      <span class="tag">Projects</span>
+      <p><strong>Mountain Sunset</strong> — Pure CSS landscape scene</p>
+      <p><strong>Spring River Garden</strong> — SVG vector recreation with animations</p>
+      <p><strong>This Portfolio</strong> — Three.js drivable world</p>
+      <hr class="divider">
+      <p>More coming soon — keep driving!</p>
+    `
+  },
+  {
+    id: 'contact',
+    label: 'CONTACT',
+    pos: [0, 0, -12],
+    color: 0x7eb8ff,
+    content: `
+      <h2>SAY HELLO</h2>
+      <span class="tag">Get In Touch</span>
+      <p>Have a project in mind? Let's make something fun together.</p>
+      <p><a href="mailto:zaynab.omer@gmail.com">zaynab.omer@gmail.com</a></p>
+      <hr class="divider">
+      <p>Inspired by <a href="https://bruno-simon.com" target="_blank">Bruno Simon</a>'s amazing portfolio.</p>
+    `
+  },
+  {
+    id: 'skills',
+    label: 'SKILLS',
+    pos: [8, 0, 0],
+    color: 0x88f0b0,
+    content: `
+      <h2>SKILLS & TOOLS</h2>
+      <span class="tag">Tech Stack</span>
+      <p><strong>Frontend:</strong> HTML · CSS · JavaScript · Three.js</p>
+      <p><strong>Creative:</strong> CSS Art · SVG · WebGL · Animations</p>
+      <p><strong>Design:</strong> Figma · Inkscape</p>
+      <hr class="divider">
+      <p>Always learning something new.</p>
+    `
+  },
+];
+
+const signGroups = [];
+
+panels.forEach(panel => {
+  const g = new THREE.Group();
+
+  // post
+  const post = cyl(0.06, 0.06, 2.2, 6, signPostMat, 0, 1.1, 0);
+  g.add(post);
+
+  // board
+  const bMat = mat(panel.color);
+  const board = box(2.2, 1, 0.12, bMat, 0, 2.2, 0);
+  g.add(board);
+
+  // label text via canvas texture
+  const canvas = document.createElement('canvas');
+  canvas.width = 256; canvas.height = 128;
+  const ctx = canvas.getContext('2d');
+  ctx.fillStyle = '#' + panel.color.toString(16).padStart(6, '0');
+  ctx.fillRect(0, 0, 256, 128);
+  ctx.fillStyle = 'rgba(0,0,0,0.75)';
+  ctx.font = 'bold 40px Arial';
+  ctx.textAlign = 'center';
+  ctx.textBaseline = 'middle';
+  ctx.fillText(panel.label, 128, 64);
+  const tex = new THREE.CanvasTexture(canvas);
+  const labelMesh = box(2.18, 0.98, 0.13, new THREE.MeshStandardMaterial({ map: tex }), 0, 2.2, 0);
+  g.add(labelMesh);
+
+  g.position.set(...panel.pos);
+  g.userData = { type: 'sign', panel };
+  g.userData.bobY = panel.pos[1];
+
+  scene.add(g);
+  signGroups.push(g);
+});
+
+// ─── Car ─────────────────────────────────────────────────────────
+const car = new THREE.Group();
+
+// body
+const body = box(1.6, 0.6, 3, carBodyMat, 0, 0.3, 0);
+car.add(body);
+
+// cabin
+const cabin = box(1.3, 0.55, 1.6, carRoofMat, 0, 0.85, -0.15);
+car.add(cabin);
+
+// windshields
+car.add(box(1.25, 0.45, 0.05, carGlassMat, 0, 0.87, 0.65));
+car.add(box(1.25, 0.45, 0.05, carGlassMat, 0, 0.87, -0.95));
+car.add(box(0.05, 0.43, 1.5, carGlassMat, 0.63, 0.87, -0.15));
+car.add(box(0.05, 0.43, 1.5, carGlassMat, -0.63, 0.87, -0.15));
+
+// headlights
+car.add(box(0.3, 0.18, 0.05, carHeadlightMat, 0.5, 0.35, 1.53));
+car.add(box(0.3, 0.18, 0.05, carHeadlightMat, -0.5, 0.35, 1.53));
+
+// taillights
+car.add(box(0.25, 0.18, 0.05, mat(0xff2222), 0.5, 0.35, -1.53));
+car.add(box(0.25, 0.18, 0.05, mat(0xff2222), -0.5, 0.35, -1.53));
+
+// wheels
+function addWheel(x, z) {
+  const wg = new THREE.Group();
+  const wheel = cyl(0.32, 0.32, 0.22, 12, carWheelMat);
+  wheel.rotation.z = Math.PI / 2;
+  wg.add(wheel);
+  const hub = cyl(0.12, 0.12, 0.24, 6, carHubMat);
+  hub.rotation.z = Math.PI / 2;
+  wg.add(hub);
+  wg.position.set(x, 0.32, z);
+  return wg;
+}
+const wheelFL = addWheel(0.85, 0.9);
+const wheelFR = addWheel(-0.85, 0.9);
+const wheelBL = addWheel(0.85, -0.9);
+const wheelBR = addWheel(-0.85, -0.9);
+car.add(wheelFL, wheelFR, wheelBL, wheelBR);
+
+car.position.set(0, 0, 2);
+car.castShadow = true;
+scene.add(car);
+
+// ─── Controls ────────────────────────────────────────────────────
+const keys = {};
+window.addEventListener('keydown', e => { keys[e.code] = true; });
+window.addEventListener('keyup', e => { keys[e.code] = false; });
+
+let speed = 0;
+let steer = 0;
+const maxSpeed = 0.18;
+const accel = 0.008;
+const drag = 0.88;
+const steerSpeed = 0.04;
+const steerReturn = 0.88;
+const wheelSpin = { angle: 0 };
+
+// ─── Click/tap to interact ────────────────────────────────────────
+const raycaster = new THREE.Raycaster();
+const pointer = new THREE.Vector2();
+
+const infoPanel = document.getElementById('info-panel');
+const panelContent = document.getElementById('panel-content');
+document.getElementById('panel-close').addEventListener('click', () => infoPanel.classList.remove('open'));
+
+window.addEventListener('click', e => {
+  pointer.x = (e.clientX / window.innerWidth) * 2 - 1;
+  pointer.y = -(e.clientY / window.innerHeight) * 2 + 1;
+  raycaster.setFromCamera(pointer, camera);
+  const hits = raycaster.intersectObjects(scene.children, true);
+  for (const hit of hits) {
+    let obj = hit.object;
+    while (obj && !obj.userData.type) obj = obj.parent;
+    if (obj && obj.userData.type === 'sign') {
+      panelContent.innerHTML = obj.userData.panel.content;
+      infoPanel.classList.add('open');
+      break;
+    }
+  }
+});
+
+// ─── Loading progress fake ────────────────────────────────────────
+let progress = 0;
+const bar = document.getElementById('prog-bar');
+const loading = document.getElementById('loading');
+const hint = document.getElementById('hint');
+
+function fakeLoad() {
+  progress += 8 + Math.random() * 12;
+  bar.style.width = Math.min(progress, 100) + '%';
+  if (progress < 100) {
+    setTimeout(fakeLoad, 80);
+  } else {
+    setTimeout(() => {
+      loading.classList.add('hidden');
+      setTimeout(() => loading.remove(), 700);
+    }, 300);
+    // Hide hint after 6s
+    setTimeout(() => hint.classList.add('hidden'), 6000);
+  }
+}
+setTimeout(fakeLoad, 200);
+
+// ─── Camera follow ───────────────────────────────────────────────
+const camOffset = new THREE.Vector3(0, 6, 11);
+const camTarget = new THREE.Vector3();
+const camPos = new THREE.Vector3();
+
+// ─── Resize ──────────────────────────────────────────────────────
+window.addEventListener('resize', () => {
+  camera.aspect = window.innerWidth / window.innerHeight;
+  camera.updateProjectionMatrix();
+  renderer.setSize(window.innerWidth, window.innerHeight);
+});
+
+// ─── Clock & loop ────────────────────────────────────────────────
+const clock = new THREE.Clock();
+let elapsed = 0;
+
+function animate() {
+  requestAnimationFrame(animate);
+  const dt = Math.min(clock.getDelta(), 0.05);
+  elapsed += dt;
+
+  // Input
+  const forward = keys['ArrowUp'] || keys['KeyW'];
+  const backward = keys['ArrowDown'] || keys['KeyS'];
+  const left = keys['ArrowLeft'] || keys['KeyA'];
+  const right = keys['ArrowRight'] || keys['KeyD'];
+
+  if (forward) speed = Math.min(speed + accel, maxSpeed);
+  else if (backward) speed = Math.max(speed - accel, -maxSpeed * 0.6);
+  speed *= drag;
+
+  if (Math.abs(speed) > 0.002) {
+    if (left) steer = Math.min(steer + steerSpeed, 0.6);
+    else if (right) steer = Math.max(steer - steerSpeed, -0.6);
+  }
+  steer *= steerReturn;
+
+  car.rotation.y += steer * speed / maxSpeed * 0.9;
+  const dir = new THREE.Vector3(Math.sin(car.rotation.y), 0, Math.cos(car.rotation.y));
+  car.position.addScaledVector(dir, speed);
+
+  // clamp to world
+  car.position.x = THREE.MathUtils.clamp(car.position.x, -28, 28);
+  car.position.z = THREE.MathUtils.clamp(car.position.z, -28, 28);
+
+  // wheel spin
+  wheelSpin.angle += speed * 3;
+  [wheelFL, wheelFR, wheelBL, wheelBR].forEach(w => {
+    w.children[0].rotation.x = wheelSpin.angle;
+    w.children[1].rotation.x = wheelSpin.angle;
+  });
+
+  // steer front wheels
+  const frontSteer = steer * 0.7;
+  wheelFL.rotation.y = frontSteer;
+  wheelFR.rotation.y = frontSteer;
+
+  // Camera follow
+  const idealOffset = camOffset.clone().applyQuaternion(car.quaternion);
+  camPos.lerp(car.position.clone().add(idealOffset), 0.08);
+  camTarget.lerp(car.position, 0.1);
+  camera.position.copy(camPos);
+  camera.lookAt(camTarget);
+
+  // Bob signs
+  signGroups.forEach((g, i) => {
+    g.position.y = Math.sin(elapsed * 1.2 + i * 1.5) * 0.06;
+    g.rotation.y = Math.sin(elapsed * 0.6 + i) * 0.04;
+  });
+
+  // Slight car body tilt
+  car.children[0].rotation.z = -steer * 0.06;
+
+  renderer.render(scene, camera);
+}
+
+animate();
+</script>
+</body>
+</html>

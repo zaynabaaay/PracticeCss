@@ -52,6 +52,23 @@
   .thumb.garden {
     background: linear-gradient(to bottom, #1f8fa0, #b5dab3, #fdef9b);
   }
+  .thumb.polaroid-thumb {
+    background: linear-gradient(155deg, #ddd3c2, #c4b7a0);
+  }
+  .thumb.polaroid-thumb .mini-polaroid {
+    width: 84px;
+    padding: 7px 7px 22px;
+    background: #f7f2e6;
+    border-radius: 2px;
+    transform: rotate(-4deg);
+    box-shadow: 0 6px 14px rgba(74, 62, 44, 0.35);
+  }
+  .thumb.polaroid-thumb .mini-polaroid::before {
+    content: "";
+    display: block;
+    aspect-ratio: 1;
+    background: radial-gradient(circle at 50% 35%, #4b4e45, #2b2e27);
+  }
   .thumb img {
     width: 100%;
     height: 100%;
@@ -88,6 +105,15 @@
       <div class="label">
         <div class="title">Spring River Garden</div>
         <div class="sub">SVG vector trace recreation</div>
+      </div>
+    </a>
+    <a class="card" href="css-art/polaroid/">
+      <div class="thumb polaroid-thumb">
+        <div class="mini-polaroid"></div>
+      </div>
+      <div class="label">
+        <div class="title">Polaroid Placeholder</div>
+        <div class="sub">Pure CSS — undeveloped film</div>
       </div>
     </a>
   </div>

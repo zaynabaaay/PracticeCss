@@ -20,10 +20,24 @@
     align-items: center;
     justify-content: center;
     padding: 40px 24px;
-    /* dark, textured desk so the torn paper reads */
-    background:
-      radial-gradient(140% 120% at 15% 10%, #6a5c4c 0%, #4a3f34 45%, #362d25 100%);
+    position: relative;
+    /* warm tan suede wall */
+    background-color: #a4906f;
+    background-image:
+      radial-gradient(120% 100% at 50% 22%, rgba(207,190,161,0.6), transparent 55%),
+      radial-gradient(150% 140% at 50% 120%, rgba(78,64,48,0.55), transparent 62%),
+      linear-gradient(180deg, #b1a082 0%, #a08a6b 55%, #8b7659 100%);
     overflow-x: hidden;
+  }
+  /* fine suede grain across the whole wall */
+  body::before {
+    content: "";
+    position: fixed;
+    inset: 0;
+    pointer-events: none;
+    opacity: 0.5;
+    mix-blend-mode: soft-light;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='200' height='200'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='3' stitchTiles='stitch'/%3E%3CfeColorMatrix type='saturate' values='0'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
   }
 
   .stage {

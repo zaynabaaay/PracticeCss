@@ -157,14 +157,16 @@
     background: linear-gradient(282deg, #170e07 60%, #5e3d24 84%, #925c37 100%);
   }
 
-  /* ---------- global grain + soft vignette over the whole shot ---------- */
+  /* ---------- global grain over the whole shot ----------
+     Fixed to the viewport (not the stage) so the suede is graine­d
+     uniformly everywhere — otherwise the stage rectangle would carry an
+     extra grain layer and read as a different tone from the margins. */
   .grain {
-    position: absolute; inset: 0; z-index: 9; pointer-events: none;
-    border-radius: 2px;
+    position: fixed; inset: 0; z-index: 9; pointer-events: none;
   }
   .grain::before {
     content: ""; position: absolute; inset: 0;
-    opacity: 0.32; mix-blend-mode: overlay;
+    opacity: 0.3; mix-blend-mode: overlay;
     background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='220' height='220'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.8' numOctaves='2' stitchTiles='stitch'/%3E%3CfeColorMatrix type='saturate' values='0'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
   }
 </style>

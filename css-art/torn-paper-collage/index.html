@@ -21,10 +21,10 @@
     justify-content: center;
     padding: 40px 24px;
     position: relative;
-    /* deep espresso wall — flat, even tone (only a whisper of vignette) */
-    background-color: #271f18;
+    /* deep espresso wall — sampled from reference (avg #1f1a14, centre #241e17) */
+    background-color: #191309;
     background-image:
-      radial-gradient(150% 150% at 50% 50%, #2c241c 0%, #221b14 100%);
+      radial-gradient(150% 150% at 50% 50%, #1c150c 0%, #150f07 100%);
     overflow-x: hidden;
   }
   /* fine suede grain across the whole wall.
@@ -36,7 +36,7 @@
     position: fixed;
     inset: 0;
     pointer-events: none;
-    opacity: 0.22;
+    opacity: 0.06;
     mix-blend-mode: soft-light;
     filter: contrast(190%) brightness(115%);
     background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='240' height='240'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.72' numOctaves='3' stitchTiles='stitch'/%3E%3CfeColorMatrix type='saturate' values='0'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
@@ -166,7 +166,7 @@
   }
   .grain::before {
     content: ""; position: absolute; inset: 0;
-    opacity: 0.3; mix-blend-mode: overlay;
+    opacity: 0.07; mix-blend-mode: overlay;
     background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='220' height='220'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.8' numOctaves='2' stitchTiles='stitch'/%3E%3CfeColorMatrix type='saturate' values='0'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
   }
 </style>

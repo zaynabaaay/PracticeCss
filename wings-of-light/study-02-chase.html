@@ -1,0 +1,543 @@
+<title>Wings of Light II — The Chase</title>
+<style>
+  /* ============================================================
+     WINGS OF LIGHT — study 02 · THE CHASE
+     Camera flies BEHIND the bird. The world is a real 3D corridor:
+     objects live at fixed positions along a 24,000px flight track,
+     and the scroll moves the camera forward through them.
+     All copy + IMAGE SLOTS are placeholders for the real story.
+     ============================================================ */
+  :root{
+    --serif:'Palatino Linotype','Book Antiqua',Palatino,Georgia,serif;
+    --arabic:'Geeza Pro','Al Bayan','Amiri','Scheherazade New','Traditional Arabic',serif;
+    --gold:#e8c27a; --gold-soft:rgba(255,220,160,.85); --ink:#fdf6e6;
+  }
+  html,body{margin:0;padding:0;background:#050816;}
+  body{overflow-x:hidden;}
+  #driver{height:1400vh;}
+  #stage{position:fixed;inset:0;overflow:hidden;}
+
+  #sky{position:absolute;inset:0;z-index:1;}
+  #stars{position:absolute;inset:0;z-index:2;width:100%;height:100%;}
+  #moon{position:absolute;right:15vw;top:9vh;width:8vmin;height:8vmin;z-index:3;
+        filter:drop-shadow(0 0 16px rgba(240,235,210,.35));will-change:transform,opacity;}
+  #moon svg{width:100%;height:100%;display:block;}
+
+  /* screen-space ground: a cheap gradient below the horizon */
+  #groundBase{position:absolute;inset:0;z-index:4;will-change:opacity;}
+
+  /* ---------- the 3D world ---------- */
+  #persp{position:absolute;inset:0;z-index:10;perspective:900px;perspective-origin:50% 40%;}
+  #track{position:absolute;inset:0;transform-style:preserve-3d;will-change:transform;}
+  /* the river: recycling flat tile segments — rigid transforms only, never repainted */
+  .riverSeg{position:absolute;left:50%;top:0;width:1024px;height:1040px;
+          transform-origin:512px 0;will-change:transform,opacity;
+          background-size:1024px 1024px;background-repeat:repeat-y;}
+  .obj{position:absolute;left:50%;top:0;will-change:transform,opacity;}
+  .obj>.anchor{transform:translate(-50%,-100%);}     /* stands on the ground */
+  .obj>.anchor.mid{transform:translate(-50%,-50%);}  /* floats (clouds, motes) */
+  .obj svg{display:block;}
+  .cloudpuff{border-radius:50%;
+    background:radial-gradient(ellipse at 50% 55%, rgba(255,252,244,.92) 0%, rgba(255,250,240,.5) 42%, rgba(255,250,240,0) 72%);}
+  .mote{border-radius:50%;
+    background:radial-gradient(circle, rgba(255,238,190,.95) 0%, rgba(255,220,150,.35) 45%, rgba(255,220,150,0) 75%);}
+  .slotFrame{border-radius:50% 50% 10px 10px / 36% 36% 10px 10px;
+    border:2px dashed rgba(255,224,168,.6);
+    background:radial-gradient(120% 90% at 50% 0%, rgba(255,226,170,.2), rgba(255,226,170,.05) 60%),
+               linear-gradient(180deg, rgba(20,28,63,.4), rgba(10,14,34,.6));
+    display:flex;align-items:center;justify-content:center;text-align:center;}
+  .slotFrame span{font:600 clamp(9px,1.1vw,14px)/1.9 var(--serif);letter-spacing:.32em;
+    text-transform:uppercase;color:rgba(255,224,168,.85);padding:1em;}
+
+  /* haze band sitting on the horizon (behind the 3D world) */
+  #haze{position:absolute;left:0;right:0;height:26vh;z-index:8;pointer-events:none;
+        transform:translateY(-50%);will-change:opacity,top;}
+
+  /* ---------- the bird (screen space, ahead of camera) ---------- */
+  #birdShadow{position:absolute;left:50%;top:0;z-index:14;width:16vmin;height:3.4vmin;
+        border-radius:50%;background:radial-gradient(ellipse, rgba(6,12,20,.5), rgba(6,12,20,0) 70%);
+        filter:blur(4px);will-change:transform,opacity;}
+  #bird{position:absolute;left:50%;top:0;z-index:25;width:0;height:0;will-change:transform,opacity;}
+  #bird .inner{width:19vmin;height:13.3vmin;transform:translate(-50%,-50%);
+        filter:drop-shadow(0 0 16px rgba(255,230,170,.55)) drop-shadow(0 3px 10px rgba(15,18,40,.4));}
+  #bird svg{width:100%;height:100%;overflow:visible;}
+  .wingflap{transform-box:view-box;transform-origin:46px 33px;
+        animation:flap var(--flap,.62s) cubic-bezier(.45,0,.55,1) infinite alternate;}
+  @keyframes flap{from{transform:rotate(-20deg)}to{transform:rotate(30deg)}}
+
+  #fx{position:absolute;inset:0;z-index:28;width:100%;height:100%;pointer-events:none;}
+  #glow{position:absolute;inset:-20%;z-index:34;opacity:0;pointer-events:none;
+        background:radial-gradient(circle at 50% 38%, #fff7e2 0%, rgba(255,235,190,.85) 22%, rgba(255,210,140,.35) 46%, rgba(255,190,120,0) 70%);
+        will-change:opacity,transform;}
+  #vignette{position:absolute;inset:0;z-index:52;pointer-events:none;
+        background:radial-gradient(ellipse at 50% 50%, rgba(0,0,0,0) 55%, rgba(4,7,18,.55) 100%);}
+
+  /* ---------- narrative ---------- */
+  .cap{position:absolute;z-index:60;opacity:0;pointer-events:none;max-width:min(38ch,78vw);
+       will-change:opacity,transform;color:var(--ink);}
+  .cap .eyebrow{font:600 10px/1 var(--serif);letter-spacing:.42em;text-transform:uppercase;
+       color:var(--gold-soft);margin:0 0 14px;}
+  .cap .ar{font-family:var(--arabic);font-size:clamp(24px,4vw,42px);line-height:1.9;direction:rtl;
+       color:#fff3da;text-shadow:0 0 26px rgba(255,215,150,.35);margin:0 0 10px;}
+  .cap p{font-family:var(--serif);font-size:clamp(17px,1.7vw,22px);line-height:1.75;margin:0;
+       text-shadow:0 1px 18px rgba(4,8,20,.7);text-wrap:pretty;}
+  .cap .ref{display:block;margin-top:12px;font:italic 400 12px/1 var(--serif);
+       letter-spacing:.18em;color:rgba(255,236,200,.6);}
+  .cap.center{left:50%;top:44%;transform:translate(-50%,-50%);text-align:center;}
+  .cap.left{left:7vw;top:26vh;} .cap.right{right:7vw;top:22vh;text-align:right;}
+  .cap.low-left{left:7vw;top:56vh;}
+  .cap.dark{color:#3c2c12;} .cap.dark p{text-shadow:none;}
+  .cap.dark .eyebrow{color:#8a6a2e;} .cap.dark .ar{color:#4a3512;text-shadow:none;}
+  .cap.dark .ref{color:rgba(90,70,30,.75);}
+
+  #title{position:absolute;inset:0;z-index:60;display:flex;flex-direction:column;
+       align-items:center;justify-content:center;text-align:center;pointer-events:none;
+       will-change:opacity,transform;}
+  #title .eyebrow{font:600 11px/1 var(--serif);letter-spacing:.5em;text-transform:uppercase;
+       color:var(--gold-soft);margin-bottom:22px;}
+  #title h1{font:400 clamp(40px,7vw,84px)/1.1 var(--serif);color:var(--ink);
+       margin:0 0 18px;letter-spacing:.04em;text-wrap:balance;
+       text-shadow:0 0 40px rgba(160,180,255,.25);}
+  #title .sub{font:italic 400 clamp(14px,1.4vw,18px)/1.6 var(--serif);color:rgba(230,235,255,.65);margin:0;}
+  #hint{position:absolute;left:50%;bottom:5vh;transform:translateX(-50%);z-index:60;
+       text-align:center;color:rgba(255,236,200,.7);font:600 10px/1 var(--serif);
+       letter-spacing:.4em;text-transform:uppercase;will-change:opacity;}
+  #hint::after{content:"";display:block;width:1px;height:38px;margin:14px auto 0;
+       background:linear-gradient(rgba(255,236,200,.8),rgba(255,236,200,0));
+       animation:drip 1.8s ease-in-out infinite;}
+  @keyframes drip{0%{transform:scaleY(.2);transform-origin:top;opacity:0}
+       40%{transform:scaleY(1);opacity:1}100%{transform:scaleY(1);transform-origin:top;opacity:0}}
+  #rail{position:absolute;left:0;top:0;bottom:0;width:2px;z-index:70;background:rgba(255,255,255,.07);}
+  #railFill{width:100%;height:0;background:linear-gradient(rgba(255,224,168,.9),rgba(255,224,168,.4));}
+  #note{position:absolute;left:14px;bottom:12px;z-index:70;font:400 10px/1.5 var(--serif);
+       letter-spacing:.12em;color:rgba(255,255,255,.35);}
+  @media (prefers-reduced-motion: reduce){
+    .wingflap{animation:none;}
+    #hint::after{animation:none;height:24px;}
+  }
+</style>
+
+<div id="driver"></div>
+<div id="stage">
+  <div id="sky"></div>
+  <canvas id="stars"></canvas>
+  <div id="moon">
+    <svg viewBox="0 0 100 100">
+      <defs><mask id="cres"><rect width="100" height="100" fill="#fff"/>
+        <circle cx="70" cy="34" r="38" fill="#000"/></mask></defs>
+      <circle cx="50" cy="50" r="40" fill="#f4eed8" mask="url(#cres)"/>
+    </svg>
+  </div>
+
+  <div id="groundBase"></div>
+  <div id="persp"><div id="track">
+    <!-- river segments + 3D objects are generated by script -->
+  </div></div>
+
+  <div id="haze"></div>
+  <div id="birdShadow"></div>
+
+  <div id="bird"><div class="inner">
+    <svg viewBox="0 0 100 70">
+      <defs>
+        <linearGradient id="bgrad" x1="0" y1="0" x2="0" y2="1">
+          <stop offset="0" stop-color="#fffaf0"/><stop offset="1" stop-color="#e2c992"/>
+        </linearGradient>
+      </defs>
+      <!-- left wing -->
+      <path class="wingflap" fill="#fff6e2"
+        d="M46 34 C34 24 16 16 3 20 C13 30 27 37 44 41 Z"/>
+      <!-- right wing (mirrored) -->
+      <g transform="translate(100 0) scale(-1 1)">
+        <path class="wingflap" fill="#f4e6c8"
+          d="M46 34 C34 24 16 16 3 20 C13 30 27 37 44 41 Z"/>
+      </g>
+      <!-- tail fan -->
+      <path fill="#e6cd9c" d="M44 50 L37 66 L50 58 L63 66 L56 50 Z"/>
+      <!-- body, seen from behind: small head above, tapering to tail -->
+      <path fill="#fdf3dd"
+        d="M50 12 C46 14 44 18 44 24 C40 30 38 40 42 51 L50 57 L58 51 C62 40 60 30 56 24 C56 18 54 14 50 12 Z"/>
+      <path fill="#e8c27a" opacity=".8" d="M50 12 C47 13.5 45.4 16 44.8 19 L55.2 19 C54.6 16 53 13.5 50 12 Z"/>
+    </svg>
+  </div></div>
+
+  <canvas id="fx"></canvas>
+  <div id="glow"></div>
+  <div id="vignette"></div>
+
+  <!-- ============ narrative (placeholder copy) ============ -->
+  <div id="title" data-a="-0.02" data-b="0.05">
+    <p class="eyebrow">A Scrollytelling Study · II</p>
+    <h1>Wings of Light</h1>
+    <p class="sub">You are flying just behind the bird. Scroll — the scroll is the flight.</p>
+  </div>
+
+  <div class="cap right" data-a="0.10" data-b="0.21">
+    <p class="eyebrow">I &nbsp;·&nbsp; The Descent</p>
+    <p class="ar">أَوَلَمْ يَرَوْا إِلَى الطَّيْرِ فَوْقَهُمْ صَافَّاتٍ وَيَقْبِضْنَ</p>
+    <p>Do they not see the birds above them — spreading their wings, and folding them in? None holds them aloft but the Most Merciful.</p>
+    <span class="ref">Qur’an 67:19 — placeholder verse</span>
+  </div>
+
+  <div class="cap left" data-a="0.27" data-b="0.36">
+    <p class="eyebrow">II &nbsp;·&nbsp; Landfall</p>
+    <p>The cloud deck breaks around you, and the earth opens below — a green country, stitched with silver water.</p>
+  </div>
+
+  <div class="cap low-left" data-a="0.42" data-b="0.55">
+    <p class="eyebrow">III &nbsp;·&nbsp; The River</p>
+    <p class="ar">جَنَّاتٍ تَجْرِي مِن تَحْتِهَا الْأَنْهَارُ</p>
+    <p>…gardens beneath which rivers flow… The bird holds the river’s line, and you hold the bird’s.</p>
+    <span class="ref">the recurring promise — placeholder verse</span>
+  </div>
+
+  <div class="cap right" data-a="0.60" data-b="0.73" style="top:18vh">
+    <p class="eyebrow">IV &nbsp;·&nbsp; The Weave</p>
+    <p>Arch after arch rises out of the distance and swallows you whole — shade, then light, then shade again.</p>
+  </div>
+
+  <div class="cap center" data-a="0.78" data-b="0.875">
+    <p class="eyebrow">V &nbsp;·&nbsp; The Return</p>
+    <p>Then the river lets you go, the ground falls away, and the sky calls its traveler home.</p>
+  </div>
+
+  <div class="cap center dark" data-a="0.92" data-b="1.2" style="top:46%">
+    <p class="ar">يَا أَيَّتُهَا النَّفْسُ الْمُطْمَئِنَّةُ ارْجِعِي إِلَىٰ رَبِّكِ رَاضِيَةً مَّرْضِيَّةً</p>
+    <p>O soul at peace — return to your Lord, well-pleased and pleasing.</p>
+    <span class="ref">Qur’an 89:27–28 — placeholder verse&nbsp;·&nbsp;end of study 02</span>
+  </div>
+
+  <div id="hint">Scroll</div>
+  <div id="rail"><div id="railFill"></div></div>
+  <div id="note">study 02 · chase camera · placeholder content — story &amp; images drop into marked slots</div>
+</div>
+
+<script>
+(() => {
+  'use strict';
+  const $=id=>document.getElementById(id);
+  const clamp=(v,a,b)=>v<a?a:v>b?b:v;
+  const lerp=(a,b,t)=>a+(b-a)*t;
+  const rng=(p,a,b)=>clamp((p-a)/(b-a),0,1);
+  const sm=t=>t*t*(3-2*t);
+  const RM=matchMedia('(prefers-reduced-motion: reduce)').matches;
+  const SNAP=location.search.includes('snap');   // test hook: no scroll smoothing
+
+  const PERSP=900, TRACK=24000, FAR=12000, HAZE_START=6500;
+
+  /* ---------- keyframed camera quantities ---------- */
+  const kf=keys=>p=>{let i=0;while(i<keys.length-2&&p>keys[i+1][0])i++;
+    const A=keys[i],B=keys[i+1];return lerp(A[1],B[1],sm(rng(p,A[0],B[0])));};
+  const altAt   = kf([[0,3200],[.10,2900],[.30,650],[.40,360],[.74,360],[.82,1400],[.93,4200],[1,5600]]);
+  const horizAt = kf([[0,.36],[.14,.29],[.34,.47],[.74,.47],[.86,.60],[1,.64]]);
+  const brightAt= kf([[0,.4],[.28,.75],[.5,1],[.78,1],[.95,.85],[1,.8]]);
+  const hazeAt  = kf([[0,.04],[.3,.3],[.55,.35],[.8,.3],[1,.55]]);
+
+  /* ---------- sky gradient journey ---------- */
+  const hx=c=>[parseInt(c.slice(1,3),16),parseInt(c.slice(3,5),16),parseInt(c.slice(5,7),16)];
+  const skyStops=[
+    [0.00,'#050816','#0b1230','#141c3f'],[0.14,'#0d1533','#2a2a5e','#6e4a72'],
+    [0.26,'#27356b','#7c5a8a','#e0906f'],[0.40,'#3f6fa8','#7fb2c9','#e8d9b0'],
+    [0.58,'#4a7fae','#8fc3cf','#dfe7c8'],[0.72,'#3c6c9a','#c9a97a','#f0d9a8'],
+    [0.84,'#2e3f77','#b8863f','#ffdf9e'],[1.00,'#241a4e','#8a5f96','#ffe9c4'],
+  ].map(s=>[s[0],hx(s[1]),hx(s[2]),hx(s[3])]);
+  function skyAt(p,hz){
+    let i=0;while(i<skyStops.length-2&&p>skyStops[i+1][0])i++;
+    const A=skyStops[i],B=skyStops[i+1],t=sm(rng(p,A[0],B[0]));
+    const mix=(a,b)=>`rgb(${a.map((v,k)=>Math.round(lerp(v,b[k],t))).join(',')})`;
+    return `linear-gradient(180deg, ${mix(A[1],B[1])} 0%, ${mix(A[2],B[2])} ${(hz*62).toFixed(1)}%, ${mix(A[3],B[3])} ${(hz*100).toFixed(1)}%, ${mix(A[2],B[2])} 100%)`;
+  }
+
+  /* ---------- bird flight keys: [p, x(vw off-center), y(vh), scale, roll] ---------- */
+  const BK=[
+    [0.00, 0,46,.70,0],[0.08,-4,50,.75,9],[0.16,5,54,.85,-11],[0.24,-2,56,.95,6],
+    [0.32, 0,58,1.00,0],[0.42,-6,58,1.00,10],[0.52,6,59,1.05,-12],[0.62,-4,57,1.05,8],
+    [0.70, 3,57,1.05,-6],[0.78,0,50,.95,0],[0.86,0,40,.78,0],[0.93,0,32,.55,0],
+    [0.97, 0,30,.40,0],[1.00,0,29,.32,0],
+  ];
+  function birdAt(p){let i=0;while(i<BK.length-2&&p>BK[i+1][0])i++;
+    const A=BK[i],B=BK[i+1],t=sm(rng(p,A[0],B[0]));
+    return {x:lerp(A[1],B[1],t),y:lerp(A[2],B[2],t),s:lerp(A[3],B[3],t),r:lerp(A[4],B[4],t)};}
+
+  /* ---------- river texture (SVG data URI, tiles seamlessly every 1024px) ---------- */
+  const uri=s=>`url("data:image/svg+xml,${encodeURIComponent(s)}")`;
+  const riverTile=uri(`<svg xmlns='http://www.w3.org/2000/svg' width='1024' height='1024'>
+    <path d='M406 0 C386 170 452 340 424 512 C396 684 452 850 406 1024 L618 1024 C664 850 608 684 636 512 C664 340 598 170 618 0 Z' fill='none' stroke='#0a231c' stroke-width='30'/>
+    <path d='M406 0 C386 170 452 340 424 512 C396 684 452 850 406 1024 L618 1024 C664 850 608 684 636 512 C664 340 598 170 618 0 Z' fill='#3f9fc0'/>
+    <path d='M406 0 C386 170 452 340 424 512 C396 684 452 850 406 1024 L618 1024 C664 850 608 684 636 512 C664 340 598 170 618 0 Z' fill='none' stroke='#a8e4ef' stroke-width='10' opacity='.6'/>
+    <path d='M512 0 C492 170 552 340 524 512 C496 684 552 850 512 1024' stroke='#eafcff' stroke-width='12' stroke-dasharray='46 150' fill='none' opacity='.8'/>
+    <path d='M460 90 C450 200 470 300 462 420' stroke='#cdeff6' stroke-width='5' stroke-dasharray='30 210' fill='none' opacity='.55'/>
+    <path d='M570 560 C560 670 585 790 572 930' stroke='#cdeff6' stroke-width='5' stroke-dasharray='30 190' fill='none' opacity='.55'/>
+  </svg>`);
+
+  /* screen-space ground gradient palette: [p, nearColor, farColor] */
+  const gStops=[
+    [0,'#0a1626','#101d31'],[.25,'#12332a','#1d4a44'],[.45,'#1d5040','#2f7a68'],
+    [.65,'#1d4f3d','#33755c'],[.82,'#2b4a3a','#7a7a55'],[1,'#2c2a4e','#6a5a8e'],
+  ].map(s=>[s[0],hx(s[1]),hx(s[2])]);
+  function groundAt(p){
+    let i=0;while(i<gStops.length-2&&p>gStops[i+1][0])i++;
+    const A=gStops[i],B=gStops[i+1],t=sm(rng(p,A[0],B[0]));
+    const mix=(a,b)=>`rgb(${a.map((v,k)=>Math.round(lerp(v,b[k],t))).join(',')})`;
+    return [mix(A[1],B[1]),mix(A[2],B[2])];
+  }
+
+  /* ---------- build the 3D world ---------- */
+  const track=$('track');
+  const SEGN=11, segs=[];
+  for(let i=0;i<SEGN;i++){
+    const el=document.createElement('div');
+    el.className='riverSeg';
+    el.style.backgroundImage=riverTile;
+    track.appendChild(el);
+    segs.push(el);
+  }
+
+  // deterministic pseudo-random so the world is stable
+  let seed=7; const rnd=()=>{seed=(seed*16807)%2147483647;return (seed-1)/2147483646;};
+
+  const objs=[];
+  function addObj(o){
+    const el=document.createElement('div');
+    el.className='obj';
+    el.innerHTML=`<div class="anchor${o.float?' mid':''}">${o.html}</div>`;
+    track.appendChild(el);
+    o.el=el; objs.push(o);
+  }
+  const treeCypress=(w,h,c)=>`<svg width="${w}" height="${h}" viewBox="0 0 100 240"><path fill="${c}" d="M50 0 C68 50 74 110 70 170 L70 200 L60 200 L60 240 L40 240 L40 200 L30 200 L30 170 C26 110 32 50 50 0 Z"/></svg>`;
+  const treeRound=(w,h,c)=>`<svg width="${w}" height="${h}" viewBox="0 0 140 220"><rect x="62" y="130" width="16" height="90" fill="${c}"/><ellipse cx="70" cy="86" rx="62" ry="70" fill="${c}"/></svg>`;
+  const treePalm=(w,h,c)=>`<svg width="${w}" height="${h}" viewBox="0 0 200 260"><path fill="${c}" d="M92 260 C97 190 88 130 102 84 L114 88 C100 134 110 194 106 260 Z"/><g fill="none" stroke="${c}" stroke-width="12" stroke-linecap="round"><path d="M108 86 C132 62 168 54 194 66"/><path d="M108 84 C136 76 172 84 192 106"/><path d="M106 82 C118 52 142 36 176 32"/><path d="M104 84 C82 60 48 52 20 62"/><path d="M104 86 C78 78 44 86 24 108"/><path d="M105 80 C96 48 74 32 40 28"/></g></svg>`;
+  const reeds=(w,h,c)=>`<svg width="${w}" height="${h}" viewBox="0 0 120 120"><g stroke="${c}" stroke-width="5" fill="none" stroke-linecap="round"><path d="M20 120 C22 80 18 55 26 30"/><path d="M45 120 C43 78 50 52 44 24"/><path d="M70 120 C74 82 68 50 76 28"/><path d="M95 120 C93 84 100 60 94 36"/></g><g fill="${c}"><ellipse cx="26" cy="26" rx="5" ry="14"/><ellipse cx="44" cy="20" rx="5" ry="14"/><ellipse cx="76" cy="24" rx="5" ry="14"/><ellipse cx="94" cy="32" rx="5" ry="13"/></g></svg>`;
+  const archSvg=(w,h)=>`<svg width="${w}" height="${h}" viewBox="0 0 300 340"><path fill="#101a30" fill-rule="evenodd" d="M10 340 L10 150 C10 60 70 8 150 8 C230 8 290 60 290 150 L290 340 L236 340 L236 152 C236 92 200 58 150 58 C100 58 64 92 64 152 L64 340 Z"/><path fill="none" stroke="rgba(232,194,122,.5)" stroke-width="5" d="M64 340 L64 152 C64 92 100 58 150 58 C200 58 236 92 236 152 L236 340"/></svg>`;
+  const mtnSvg=(w,h,c)=>`<svg width="${w}" height="${h}" viewBox="0 0 1200 400" preserveAspectRatio="none"><defs><linearGradient id="mfade" x1="0" y1="0" x2="0" y2="1"><stop offset=".55" stop-color="${c}"/><stop offset="1" stop-color="${c}" stop-opacity="0"/></linearGradient></defs><path fill="url(#mfade)" d="M0 400 L0 300 L160 140 L300 250 L470 90 L640 260 L820 130 L980 270 L1120 190 L1200 250 L1200 400 Z"/></svg>`;
+
+  // descent clouds (fade in once the dive begins, so the title floats in clear sky)
+  for(let i=0;i<18;i++){
+    const s=700+rnd()*800;
+    addObj({z:1600+i*430+rnd()*300, x:(rnd()-.5)*3800, elev:1300+rnd()*1900, float:1, base:.9, minP:.015,
+      html:`<div class="cloudpuff" style="width:${s}px;height:${s*.36}px"></div>`});
+  }
+  // river-bank trees — two runs so the banks stay alive through the weave
+  const kinds=[treeCypress,treeRound,treePalm,reeds];
+  for(let i=0;i<26;i++){
+    const side=i%2?1:-1, k=kinds[i%4];
+    const h=k===reeds?200+rnd()*120:440+rnd()*340, w=h*(k===treeRound?.64:k===treePalm?.77:.42);
+    const col=rnd()<.5?'#0e211d':'#132e26';
+    addObj({z:7600+i*330+rnd()*140, x:side*(430+rnd()*850)+(rnd()-.5)*120, elev:0, base:1,
+      html:k(w,h,col)});
+  }
+  for(let i=0;i<14;i++){
+    const side=i%2?-1:1, k=kinds[(i+1)%4];
+    const h=k===reeds?200+rnd()*120:440+rnd()*340, w=h*(k===treeRound?.64:k===treePalm?.77:.42);
+    addObj({z:15400+i*330+rnd()*140, x:side*(520+rnd()*800), elev:0, base:1,
+      html:k(w,h,'#101f2a')});
+  }
+  // floating light motes along the river
+  for(let i=0;i<16;i++){
+    const s=26+rnd()*34;
+    addObj({z:8200+i*640, x:(rnd()-.5)*1100, elev:80+rnd()*300, float:1, base:.95,
+      html:`<div class="mote" style="width:${s}px;height:${s}px"></div>`});
+  }
+  // image slots floating beside the flight path
+  addObj({z:12100, x:740, elev:330, float:1, base:1,
+    html:`<div class="slotFrame" style="width:340px;height:470px"><span>Image slot 01<br/>your photograph here</span></div>`});
+  addObj({z:13700, x:-780, elev:370, float:1, base:1,
+    html:`<div class="slotFrame" style="width:340px;height:470px"><span>Image slot 02<br/>your photograph here</span></div>`});
+  // the weave: arches spanning the river
+  for(let i=0;i<5;i++){
+    addObj({z:14400+i*950, x:0, elev:0, base:1, near:280, html:archSvg(2400,2720)});
+  }
+  // mountains: two mid-distance flanks, one eternal ridge on the horizon
+  addObj({z:18600, x:-2700, elev:0, base:.85, minP:.2, html:mtnSvg(2800,1000,'#1b2e3c')});
+  addObj({z:21200, x:2900, elev:0, base:.85, minP:.2, html:mtnSvg(2800,1050,'#1b2e3c')});
+  addObj({z:40000, x:0, elev:0, base:.8, minP:.2, html:mtnSvg(26000,7400,'#232c52')});
+  // ascent clouds
+  for(let i=0;i<9;i++){
+    const s=800+rnd()*900;
+    addObj({z:19800+i*440+rnd()*260, x:(rnd()-.5)*3600, elev:2400+rnd()*2400, float:1, base:.9,
+      html:`<div class="cloudpuff" style="width:${s}px;height:${s*.36}px"></div>`});
+  }
+
+  /* ---------- element handles ---------- */
+  const sky=$('sky'), moon=$('moon'), persp=$('persp'), groundBase=$('groundBase'),
+        bird=$('bird'), birdShadow=$('birdShadow'), haze=$('haze'),
+        glow=$('glow'), hint=$('hint'), railFill=$('railFill'),
+        caps=[...document.querySelectorAll('.cap'), $('title')];
+
+  /* ---------- canvases ---------- */
+  const starC=$('stars'), fxC=$('fx');
+  const sCtx=starC.getContext('2d'), fCtx=fxC.getContext('2d');
+  let W=innerWidth,H=innerHeight,DPR=Math.min(devicePixelRatio||1,2),maxScroll=1,starField=[];
+  function sizeCanvas(c,ctx){c.width=W*DPR;c.height=H*DPR;ctx.setTransform(DPR,0,0,DPR,0,0);}
+  function resize(){
+    W=innerWidth;H=innerHeight;
+    sizeCanvas(starC,sCtx);sizeCanvas(fxC,fCtx);
+    starField=Array.from({length:220},()=>({x:Math.random()*W,y:Math.random()*H,
+      r:Math.random()*1.4+.3,ph:Math.random()*Math.PI*2,sp:Math.random()*1.2+.4}));
+    maxScroll=$('driver').offsetHeight-H;
+  }
+
+  const parts=[];
+  const spawn=(x,y,vx,vy,life,size,hue)=>parts.push({x,y,vx,vy,life,max:life,size,hue});
+  function drawParticles(dt){
+    fCtx.globalCompositeOperation='lighter';
+    for(let i=parts.length-1;i>=0;i--){
+      const q=parts[i];q.life-=dt;if(q.life<=0){parts.splice(i,1);continue;}
+      q.x+=q.vx*dt*60;q.y+=q.vy*dt*60;
+      const a=sm(q.life/q.max);
+      fCtx.beginPath();fCtx.fillStyle=`hsla(${q.hue},85%,78%,${a*.8})`;
+      fCtx.arc(q.x,q.y,q.size*a+.4,0,7);fCtx.fill();
+    }
+    fCtx.globalCompositeOperation='source-over';
+  }
+  function drawStars(p,now){
+    const night=1-sm(rng(p,.10,.26)),fin=sm(rng(p,.86,.98));
+    const a=Math.max(night,fin*.9);
+    if(a<=.01)return;
+    const gold=fin>night;
+    for(const st of starField){
+      const tw=.55+.45*Math.sin(now*.001*st.sp+st.ph);
+      sCtx.beginPath();
+      sCtx.fillStyle=gold?`rgba(255,225,161,${a*tw})`:`rgba(205,214,255,${a*tw})`;
+      sCtx.arc(st.x,st.y,st.r,0,7);sCtx.fill();
+    }
+  }
+  function updCaps(p){
+    for(const el of caps){
+      const a=+el.dataset.a,b=+el.dataset.b,w=b-a;
+      const o=Math.min(rng(p,a,a+w*.22),1-rng(p,b-w*.22,b));
+      el.style.opacity=sm(clamp(o,0,1)).toFixed(3);
+      const rise=(1-sm(rng(p,a,a+w*.22)))*3;
+      if(el.id==='title')el.style.transform=`translateY(${rise}vh)`;
+      else el.style.transform=`${el.classList.contains('center')?'translate(-50%,-50%) ':''}translateY(${rise}vh)`;
+    }
+  }
+
+  /* ---------- main loop ---------- */
+  let cur=0,lastNow=0,frame=0,burstDone=false,mx=0,mxT=0;
+  addEventListener('mousemove',e=>{mxT=(e.clientX/W-.5)*2;},{passive:true});
+
+  function tick(now){
+   try{
+    const dt=Math.min((now-lastNow)/1000,.05)||.016;lastNow=now;frame++;
+    const target=scrollY;
+    cur=(RM||SNAP)?target:lerp(cur,target,.09);
+    if(Math.abs(cur-target)<.4)cur=target;
+    const p=clamp(cur/maxScroll,0,1);
+    mx=lerp(mx,mxT,.04);
+
+    const camZ=p*TRACK, alt=altAt(p), hz=horizAt(p), hzPx=hz*H;
+    const B=birdAt(p);
+    const bob=RM?0:Math.sin(now*.0021+p*28)*1.1;
+    const sway=RM?0:Math.sin(now*.0015)*2.5;
+
+    /* sky + celestial */
+    sky.style.background=skyAt(p,hz);
+    sCtx.clearRect(0,0,W,H);drawStars(p,now);
+    moon.style.opacity=(1-sm(rng(p,.05,.16))).toFixed(3);
+    moon.style.transform=`translateY(${sm(rng(p,0,.2))*40}vh)`;
+
+    /* camera: perspective origin = horizon; track banks and follows the bird's line */
+    persp.style.perspectiveOrigin=`${50+mx*1.5}% ${(hz*100).toFixed(2)}%`;
+    track.style.transform=`translateX(${(-B.x*.5/100*W).toFixed(1)}px) rotateZ(${(-(B.r+sway)*.22).toFixed(2)}deg)`;
+
+    /* ground: screen-space gradient + recycling 3D river segments */
+    const asc=sm(rng(p,.80,.94));
+    const [gNear,gFar]=groundAt(p);
+    groundBase.style.background=
+      `linear-gradient(180deg, rgba(0,0,0,0) ${(hz*100-.5).toFixed(2)}%, ${gFar} ${(hz*100+1.5).toFixed(2)}%, ${gNear} 100%)`;
+    groundBase.style.opacity=(1-asc*.97).toFixed(3);
+    const segBase=Math.floor((camZ-700)/1024), segBright=brightAt(p).toFixed(3);
+    for(let i=0;i<SEGN;i++){
+      const zk=(segBase+i)*1024, dz=zk-camZ, el=segs[i];
+      if(dz>9600){el.style.display='none';continue;}
+      el.style.display='';
+      el.style.transform=`translate3d(-512px, ${(hzPx+alt).toFixed(1)}px, ${(-dz).toFixed(1)}px) rotateX(-90deg)`;
+      el.style.opacity=(1-asc).toFixed(3);
+      el.style.filter=`brightness(${segBright})`;
+    }
+
+    /* 3D objects */
+    for(const o of objs){
+      const dz=o.z-camZ, near=o.near||60;
+      if(dz<near||dz>((o.z>30000)?38000:FAR)){o.el.style.display='none';continue;}
+      o.el.style.display='';
+      let op=o.base*clamp((FAR-dz)/(FAR-HAZE_START),0,1);
+      if(o.z>30000)op=o.base*.9;                       // eternal ridge: always hazy
+      op*=clamp((dz-near)/220,0,1);
+      if(o.minP)op*=sm(rng(p,o.minP,o.minP+.08));
+      if(asc>0)op*=(1-asc);
+      o.el.style.opacity=op.toFixed(3);
+      o.el.style.transform=`translate3d(${o.x.toFixed(1)}px, ${(hzPx+alt-o.elev).toFixed(1)}px, ${(-dz).toFixed(1)}px)`;
+    }
+
+    /* haze on the horizon */
+    haze.style.top=(hz*100).toFixed(2)+'%';
+    haze.style.background=`linear-gradient(180deg, rgba(255,240,214,0), rgba(255,240,214,${hazeAt(p).toFixed(3)}), rgba(255,240,214,0))`;
+
+    /* the bird (chase view) */
+    bird.style.transform=`translate(${B.x+sway*.4}vw, ${(B.y+bob).toFixed(2)}vh) rotate(${(B.r+sway).toFixed(2)}deg) scale(${B.s.toFixed(3)})`;
+    bird.style.opacity=(1-sm(rng(p,.945,.985))).toFixed(3);
+    document.documentElement.style.setProperty('--flap', p<.28?'.5s':p>.8?'.44s':'.68s');
+
+    /* bird's shadow on the water */
+    const shY=hzPx+alt*PERSP/(PERSP+520);
+    const shOp=clamp(1-alt/650,0,1)*.5*(p>.3&&p<.8?1:0);
+    birdShadow.style.opacity=shOp.toFixed(3);
+    birdShadow.style.transform=`translate(calc(-50% + ${B.x}vw), ${shY.toFixed(1)}px) scale(${(B.s*clamp(650/(alt+140),.3,2)).toFixed(3)},1)`;
+
+    /* particles */
+    fCtx.clearRect(0,0,W,H);
+    if(!RM){
+      const bx=W/2+B.x/100*W, by=(B.y+bob)/100*H;
+      const span=W*.095*B.s;
+      if(p>.02&&p<.93&&frame%2===0){
+        spawn(bx-span,by+8*B.s,-(.8+Math.random()),.5+Math.random()*.6,.8+Math.random()*.5,2*B.s,45);
+        spawn(bx+span,by+8*B.s,(.8+Math.random()),.5+Math.random()*.6,.8+Math.random()*.5,2*B.s,45);
+      }
+      if(p>.34&&p<.78&&frame%3===0)
+        spawn(Math.random()*W,H*(hz+.1+Math.random()*(1-hz-.12)),(Math.random()-.5)*.3,-.3,.7+Math.random()*.6,1.4,52);
+      if(p>.86&&p<.985&&frame%2===0)
+        spawn(Math.random()*W,H+10,(Math.random()-.5)*.4,-1.2-Math.random()*1.4,1.4+Math.random(),1.8,44);
+      if(p>.955&&!burstDone){burstDone=true;
+        for(let i=0;i<70;i++){const a=Math.random()*Math.PI*2,v=1+Math.random()*3;
+          spawn(W*.5,H*.3,Math.cos(a)*v,Math.sin(a)*v,1.2+Math.random(),2.4,46);}}
+      if(p<.9)burstDone=false;
+      /* wind streaks during the dive and the climb */
+      const rush=Math.min(rng(p,.07,.13),1-rng(p,.24,.30))+Math.min(rng(p,.80,.85),1-rng(p,.90,.95));
+      if(rush>0){
+        fCtx.globalCompositeOperation='lighter';
+        fCtx.strokeStyle=`rgba(255,250,235,${(rush*.09).toFixed(3)})`;
+        fCtx.lineWidth=1.1;
+        for(let i=0;i<7;i++){
+          const a=Math.random()*Math.PI*2,cx=W/2,cy=H*hz;
+          const r1=140+Math.random()*Math.min(W,H)*.45,r2=r1+40+Math.random()*120;
+          fCtx.beginPath();
+          fCtx.moveTo(cx+Math.cos(a)*r1,cy+Math.sin(a)*r1);
+          fCtx.lineTo(cx+Math.cos(a)*r2,cy+Math.sin(a)*r2);
+          fCtx.stroke();
+        }
+        fCtx.globalCompositeOperation='source-over';
+      }
+    }
+    drawParticles(dt);
+
+    /* glow of the return */
+    const g=sm(rng(p,.84,.97));
+    glow.style.opacity=g.toFixed(3);
+    glow.style.transform=`scale(${(.7+g*.5).toFixed(3)})`;
+
+    updCaps(p);
+    hint.style.opacity=(1-rng(p,.005,.03)).toFixed(3);
+    railFill.style.height=(p*100).toFixed(2)+'%';
+    if(SNAP)window.__d={p:+p.toFixed(4),f:frame,maxScroll,sy:scrollY,
+      sky:sky.style.background,glow:glow.style.opacity};
+   }catch(e){window.__err=String(e.stack||e);}
+    requestAnimationFrame(tick);
+  }
+
+  addEventListener('resize',resize);
+  resize();
+  requestAnimationFrame(tick);
+})();
+</script>

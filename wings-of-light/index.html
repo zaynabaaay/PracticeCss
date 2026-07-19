@@ -1,0 +1,564 @@
+<title>Wings of Light — Scroll Study 01</title>
+<style>
+  /* ============================================================
+     WINGS OF LIGHT — scrollytelling study 01
+     A continuous camera journey: sky → descent → river → weave → return.
+     All narrative text and the marked IMAGE SLOTS are placeholders,
+     designed to be swapped for the real story content.
+     ============================================================ */
+  :root{
+    --serif: 'Palatino Linotype','Book Antiqua',Palatino,Georgia,serif;
+    --arabic: 'Geeza Pro','Al Bayan','Amiri','Scheherazade New','Traditional Arabic',serif;
+    --gold: #e8c27a;
+    --gold-soft: rgba(255,220,160,.85);
+    --ink-light: #fdf6e6;
+  }
+  html,body{margin:0;padding:0;background:#050816;}
+  html{scroll-behavior:auto;}
+  body{overflow-x:hidden;}
+
+  /* The invisible scroll driver — its height is the length of the journey */
+  #driver{height:1300vh;}
+
+  /* The stage: everything visible lives here, fixed to the viewport */
+  #stage{position:fixed;inset:0;overflow:hidden;}
+
+  #sky{position:absolute;inset:0;z-index:1;}
+  #stars{position:absolute;inset:0;z-index:2;width:100%;height:100%;}
+  #moon{position:absolute;right:13vw;top:11vh;width:9vmin;height:9vmin;z-index:3;
+        filter:drop-shadow(0 0 18px rgba(240,235,210,.35));}
+
+  /* ---------- world (terrain) ---------- */
+  #world{position:absolute;inset:0;z-index:10;transform-origin:50% 80%;}
+  .terrain{position:absolute;left:-10vw;right:-10vw;will-change:transform;}
+  .terrain svg{display:block;width:100%;height:100%;}
+  #mtnFar {bottom:22vh;height:46vh;}
+  #mtnNear{bottom:8vh; height:44vh;}
+  #hills  {bottom:-2vh;height:34vh;}
+  #riverWrap{bottom:-2vh;height:52vh;}
+
+  /* ---------- clouds ---------- */
+  .cloudLayer{position:absolute;inset:0;pointer-events:none;will-change:transform,opacity;opacity:0;}
+  #cl1{z-index:12;} #cl2{z-index:26;} #cl3{z-index:40;filter:blur(2px);}
+  .puff{position:absolute;border-radius:50%;
+        background:radial-gradient(ellipse at 50% 55%, rgba(255,252,244,.95) 0%, rgba(255,250,240,.55) 40%, rgba(255,250,240,0) 72%);}
+
+  /* ---------- image slot (placeholder for user photos) ---------- */
+  #imgSlot{position:absolute;right:7vw;bottom:26vh;width:clamp(200px,23vw,340px);
+           aspect-ratio:3/4.2;z-index:16;opacity:0;will-change:transform,opacity;
+           border-radius:50% 50% 8px 8px / 38% 38% 8px 8px;   /* horseshoe-arch frame */
+           border:1px dashed rgba(255,224,168,.55);
+           background:
+             radial-gradient(120% 90% at 50% 0%, rgba(255,226,170,.18), rgba(255,226,170,.04) 60%),
+             linear-gradient(180deg, rgba(20,28,63,.35), rgba(10,14,34,.55));
+           backdrop-filter: blur(2px);
+           display:flex;align-items:center;justify-content:center;text-align:center;}
+  #imgSlot span{font:600 10px/1.8 var(--serif);letter-spacing:.35em;text-transform:uppercase;
+                color:rgba(255,224,168,.75);padding:1em;}
+
+  /* ---------- glow, rays, vignette ---------- */
+  #glow{position:absolute;inset:-20%;z-index:24;opacity:0;pointer-events:none;
+        background:radial-gradient(circle at 50% 40%, #fff7e2 0%, rgba(255,235,190,.85) 22%, rgba(255,210,140,.35) 45%, rgba(255,190,120,0) 70%);
+        will-change:opacity,transform;}
+  #rays{position:absolute;inset:0;z-index:22;opacity:0;pointer-events:none;mix-blend-mode:screen;will-change:opacity;}
+  .ray{position:absolute;top:-20vh;height:150vh;width:14vw;
+       background:linear-gradient(180deg, rgba(255,238,200,.5), rgba(255,238,200,0) 80%);
+       filter:blur(10px);}
+  .ray.r1{left:18vw;transform:rotate(14deg);}
+  .ray.r2{left:55vw;width:9vw;transform:rotate(10deg);opacity:.7;}
+  #vignette{position:absolute;inset:0;z-index:52;pointer-events:none;
+        background:radial-gradient(ellipse at 50% 50%, rgba(0,0,0,0) 55%, rgba(4,7,18,.55) 100%);}
+
+  /* ---------- the bird ---------- */
+  #bird{position:absolute;left:0;top:0;z-index:25;width:0;height:0;will-change:transform,opacity;}
+  #bird .inner{width:16vmin;height:9.6vmin;transform:translate(-50%,-50%);
+               filter:drop-shadow(0 0 14px rgba(255,230,170,.55)) drop-shadow(0 2px 8px rgba(20,20,40,.35));}
+  #bird svg{width:100%;height:100%;overflow:visible;}
+  .wingF{transform-origin:46px 29px;transform-box:view-box;
+         animation:flapF var(--flap,.65s) cubic-bezier(.45,0,.55,1) infinite alternate;}
+  .wingB{transform-origin:47px 30px;transform-box:view-box;
+         animation:flapB var(--flap,.65s) cubic-bezier(.45,0,.55,1) infinite alternate;
+         animation-delay:calc(var(--flap,.65s) * -0.5);}
+  @keyframes flapF{from{transform:rotate(18deg)}to{transform:rotate(-46deg)}}
+  @keyframes flapB{from{transform:rotate(34deg)}to{transform:rotate(-8deg)}}
+
+  /* ---------- foreground weave elements ---------- */
+  .fg{position:absolute;top:0;height:100vh;pointer-events:none;opacity:0;will-change:transform,opacity;}
+  .fg svg{height:100vh;display:block;}
+  .fg.back{z-index:18;} .fg.front{z-index:32;filter:blur(1.5px);}
+  #fxTrail{position:absolute;inset:0;z-index:28;width:100%;height:100%;pointer-events:none;}
+
+  /* ---------- text ---------- */
+  .cap{position:absolute;z-index:60;opacity:0;pointer-events:none;max-width:min(38ch,78vw);
+       will-change:opacity,transform;color:var(--ink-light);}
+  .cap .eyebrow{font:600 10px/1 var(--serif);letter-spacing:.42em;text-transform:uppercase;
+                color:var(--gold-soft);margin:0 0 14px;}
+  .cap .ar{font-family:var(--arabic);font-size:clamp(26px,4.2vw,44px);line-height:1.9;direction:rtl;
+           color:#fff3da;text-shadow:0 0 26px rgba(255,215,150,.35);margin:0 0 10px;}
+  .cap p{font-family:var(--serif);font-size:clamp(17px,1.7vw,22px);line-height:1.75;margin:0;
+         text-shadow:0 1px 18px rgba(4,8,20,.7);text-wrap:pretty;}
+  .cap .ref{display:block;margin-top:12px;font:italic 400 12px/1 var(--serif);
+            letter-spacing:.18em;color:rgba(255,236,200,.6);}
+  .cap.center{left:50%;top:44%;transform:translate(-50%,-50%);text-align:center;}
+  .cap.left{left:8vw;top:30vh;} .cap.right{right:8vw;top:24vh;text-align:right;}
+  .cap.low-left{left:8vw;top:52vh;}
+  .cap.dark{color:#3c2c12;} .cap.dark p{text-shadow:none;}
+  .cap.dark .eyebrow{color:#8a6a2e;} .cap.dark .ar{color:#4a3512;text-shadow:none;}
+  .cap.dark .ref{color:rgba(90,70,30,.75);}
+
+  #title{position:absolute;inset:0;z-index:60;display:flex;flex-direction:column;
+         align-items:center;justify-content:center;text-align:center;pointer-events:none;
+         will-change:opacity,transform;}
+  #title .eyebrow{font:600 11px/1 var(--serif);letter-spacing:.5em;text-transform:uppercase;
+         color:var(--gold-soft);margin-bottom:22px;}
+  #title h1{font:400 clamp(40px,7vw,84px)/1.1 var(--serif);color:var(--ink-light);
+         margin:0 0 18px;letter-spacing:.04em;text-wrap:balance;
+         text-shadow:0 0 40px rgba(160,180,255,.25);}
+  #title .sub{font:italic 400 clamp(14px,1.4vw,18px)/1.6 var(--serif);color:rgba(230,235,255,.65);margin:0;}
+  #hint{position:absolute;left:50%;bottom:5vh;transform:translateX(-50%);z-index:60;
+        text-align:center;color:rgba(255,236,200,.7);font:600 10px/1 var(--serif);
+        letter-spacing:.4em;text-transform:uppercase;will-change:opacity;}
+  #hint::after{content:"";display:block;width:1px;height:38px;margin:14px auto 0;
+        background:linear-gradient(rgba(255,236,200,.8),rgba(255,236,200,0));
+        animation:drip 1.8s ease-in-out infinite;}
+  @keyframes drip{0%{transform:scaleY(.2);transform-origin:top;opacity:0}
+                  40%{transform:scaleY(1);opacity:1}100%{transform:scaleY(1);transform-origin:top;opacity:0}}
+
+  #rail{position:absolute;left:0;top:0;bottom:0;width:2px;z-index:70;background:rgba(255,255,255,.07);}
+  #railFill{width:100%;height:0;background:linear-gradient(rgba(255,224,168,.9),rgba(255,224,168,.4));}
+  #note{position:absolute;left:14px;bottom:12px;z-index:70;font:400 10px/1.5 var(--serif);
+        letter-spacing:.12em;color:rgba(255,255,255,.35);}
+
+  @media (prefers-reduced-motion: reduce){
+    .wingF,.wingB{animation:none;}
+    #hint::after{animation:none;height:24px;}
+  }
+</style>
+
+<div id="driver"></div>
+
+<div id="stage">
+  <div id="sky"></div>
+  <canvas id="stars"></canvas>
+
+  <div id="moon">
+    <svg viewBox="0 0 100 100">
+      <defs><mask id="cres"><rect width="100" height="100" fill="#fff"/>
+        <circle cx="66" cy="40" r="38" fill="#000"/></mask></defs>
+      <circle cx="50" cy="50" r="40" fill="#f4eed8" mask="url(#cres)"/>
+    </svg>
+  </div>
+
+  <!-- ================= WORLD ================= -->
+  <div id="world">
+    <div class="terrain" id="mtnFar">
+      <svg viewBox="0 0 1200 400" preserveAspectRatio="none">
+        <path fill="#232c52" d="M0 400 L0 250 L140 130 L250 225 L390 85 L520 235 L690 115 L850 250 L995 150 L1120 235 L1200 190 L1200 400 Z"/>
+      </svg>
+    </div>
+    <div class="terrain" id="mtnNear">
+      <svg viewBox="0 0 1200 400" preserveAspectRatio="none">
+        <path fill="#1b2e3c" d="M0 400 L0 290 L170 170 L320 280 L470 150 L640 290 L800 180 L960 300 L1100 210 L1200 280 L1200 400 Z"/>
+      </svg>
+    </div>
+    <div class="terrain" id="hills">
+      <svg viewBox="0 0 1200 300" preserveAspectRatio="none">
+        <path fill="#14282a" d="M0 300 L0 190 Q150 130 300 175 Q450 215 600 160 Q750 110 900 170 Q1050 225 1200 165 L1200 300 Z"/>
+        <path fill="#0f2022" opacity=".9" d="M0 300 L0 240 Q200 200 400 235 Q600 268 800 225 Q1000 185 1200 235 L1200 300 Z"/>
+      </svg>
+    </div>
+    <div class="terrain" id="riverWrap">
+      <svg viewBox="0 0 1200 500" preserveAspectRatio="none">
+        <defs>
+          <linearGradient id="rg" x1="0" y1="0" x2="0" y2="1">
+            <stop offset="0" stop-color="#bfe9f2"/>
+            <stop offset=".45" stop-color="#5fb2c9"/>
+            <stop offset="1" stop-color="#2e86a8"/>
+          </linearGradient>
+        </defs>
+        <path fill="url(#rg)" opacity=".95"
+          d="M585 0 C540 80 700 120 640 190 C590 250 420 285 470 360 C505 420 400 465 335 500
+             L905 500 C815 445 885 400 805 355 C735 318 700 300 762 240 C822 180 645 115 668 0 Z"/>
+        <path id="flow" fill="none" stroke="rgba(255,255,255,.5)" stroke-width="7"
+          stroke-linecap="round" stroke-dasharray="26 110" opacity=".65"
+          d="M622 0 C590 90 665 130 700 195 C660 260 480 290 520 360 C550 420 500 460 620 500"/>
+      </svg>
+    </div>
+  </div>
+
+  <!-- ================= CLOUDS ================= -->
+  <div class="cloudLayer" id="cl1">
+    <div class="puff" style="left:5%;  top:18%;width:44vw;height:16vw;"></div>
+    <div class="puff" style="left:55%; top:34%;width:38vw;height:14vw;"></div>
+    <div class="puff" style="left:25%; top:62%;width:50vw;height:17vw;"></div>
+  </div>
+  <div class="cloudLayer" id="cl2">
+    <div class="puff" style="left:-8%; top:28%;width:52vw;height:18vw;"></div>
+    <div class="puff" style="left:52%; top:12%;width:44vw;height:16vw;"></div>
+    <div class="puff" style="left:30%; top:70%;width:56vw;height:19vw;"></div>
+  </div>
+  <div class="cloudLayer" id="cl3">
+    <div class="puff" style="left:-12%;top:40%;width:66vw;height:24vw;"></div>
+    <div class="puff" style="left:48%; top:58%;width:62vw;height:22vw;"></div>
+  </div>
+
+  <!-- ============ IMAGE SLOT 01 (swap for a real photo) ============ -->
+  <div id="imgSlot"><span>Image slot 01<br/>your photograph here</span></div>
+
+  <!-- god-rays for the weave chapter -->
+  <div id="rays"><div class="ray r1"></div><div class="ray r2"></div></div>
+
+  <!-- ================= FOREGROUND WEAVE ================= -->
+  <!-- Arches and fronds that slide past the camera; .front passes over the bird, .back behind it -->
+  <div class="fg back" id="fg1">
+    <svg viewBox="0 0 420 900" preserveAspectRatio="xMidYMax meet">
+      <path fill="#101a30" fill-rule="evenodd" opacity=".92"
+        d="M0 0 H420 V900 H0 Z
+           M210 120 C120 120 68 195 68 310 L68 900 L352 900 L352 310 C352 195 300 120 210 120 Z"/>
+      <path fill="none" stroke="rgba(232,194,122,.35)" stroke-width="3"
+        d="M210 132 C128 132 80 202 80 310 L80 900 M340 900 L340 310 C340 202 292 132 210 132"/>
+    </svg>
+  </div>
+  <div class="fg front" id="fg2">
+    <svg viewBox="0 0 420 900" preserveAspectRatio="xMidYMax meet">
+      <path fill="#0b1322" fill-rule="evenodd"
+        d="M0 0 H420 V900 H0 Z
+           M210 100 C112 100 56 180 56 305 L56 900 L364 900 L364 305 C364 180 308 100 210 100 Z"/>
+    </svg>
+  </div>
+  <div class="fg back" id="fg3">
+    <svg viewBox="0 0 500 900" preserveAspectRatio="xMidYMax meet">
+      <!-- stylised palm: tapered trunk + frond arcs -->
+      <path fill="#0e1f22" d="M245 900 C255 720 235 560 268 430 L292 436 C262 566 282 724 275 900 Z"/>
+      <g fill="none" stroke="#0e1f22" stroke-width="16" stroke-linecap="round">
+        <path d="M278 436 C320 380 400 360 470 384"/>
+        <path d="M278 432 C330 410 420 420 480 470"/>
+        <path d="M276 430 C300 350 350 310 430 300"/>
+        <path d="M274 432 C240 370 170 350 95 372"/>
+        <path d="M274 434 C220 400 140 408 80 455"/>
+        <path d="M276 428 C255 345 205 305 120 296"/>
+      </g>
+    </svg>
+  </div>
+  <div class="fg front" id="fg4">
+    <svg viewBox="0 0 600 400" preserveAspectRatio="xMinYMin meet" style="height:60vh">
+      <!-- hanging bough from the top of frame -->
+      <path fill="none" stroke="#0a1220" stroke-width="14" stroke-linecap="round"
+        d="M80 -20 C140 90 240 150 380 175 C460 190 520 230 560 300"/>
+      <g fill="#0a1220">
+        <ellipse cx="250" cy="165" rx="52" ry="16" transform="rotate(24 250 165)"/>
+        <ellipse cx="360" cy="185" rx="58" ry="17" transform="rotate(12 360 185)"/>
+        <ellipse cx="470" cy="225" rx="52" ry="15" transform="rotate(34 470 225)"/>
+        <ellipse cx="545" cy="295" rx="44" ry="14" transform="rotate(52 545 295)"/>
+      </g>
+    </svg>
+  </div>
+
+  <!-- ================= THE BIRD ================= -->
+  <div id="bird"><div class="inner">
+    <svg viewBox="0 0 100 60">
+      <defs>
+        <linearGradient id="bg1" x1="0" y1="0" x2="0" y2="1">
+          <stop offset="0" stop-color="#fffaf0"/><stop offset="1" stop-color="#e6cd9c"/>
+        </linearGradient>
+      </defs>
+      <path class="wingB" fill="#d9c69a" d="M47 30 C43 17 51 8 69 6 C61 14 56 23 54 31 Z"/>
+      <path fill="url(#bg1)"
+        d="M4 30 L18 33 C30 28 44 26 56 28 C62 22 72 19 83 20 C90 21 94 25 95 29
+           C88 33 78 34 68 33 C56 39 40 41 28 38 L6 42 L14 35 Z"/>
+      <path fill="#e8c27a" d="M93 25 L102 29 L93 32 Z"/>
+      <circle cx="86" cy="25.5" r="1.4" fill="#3a2c14"/>
+      <path class="wingF" fill="#fff6e2" d="M42 29 C36 13 47 3 70 1 C59 12 52 22 50 31 Z"/>
+    </svg>
+  </div></div>
+
+  <canvas id="fxTrail"></canvas>
+  <div id="glow"></div>
+  <div id="vignette"></div>
+
+  <!-- ================= NARRATIVE (all placeholder copy) ================= -->
+  <div id="title" data-a="-0.02" data-b="0.055">
+    <p class="eyebrow">A Scrollytelling Study</p>
+    <h1>Wings of Light</h1>
+    <p class="sub">Follow the bird. Scroll slowly — the scroll is the flight.</p>
+  </div>
+
+  <div class="cap right" data-a="0.115" data-b="0.225">
+    <p class="eyebrow">I &nbsp;·&nbsp; The Descent</p>
+    <p class="ar">أَوَلَمْ يَرَوْا إِلَى الطَّيْرِ فَوْقَهُمْ صَافَّاتٍ وَيَقْبِضْنَ</p>
+    <p>Do they not see the birds above them — spreading their wings, and folding them in? None holds them aloft but the Most Merciful.</p>
+    <span class="ref">Qur’an 67:19 — placeholder verse</span>
+  </div>
+
+  <div class="cap left" data-a="0.29" data-b="0.385">
+    <p class="eyebrow">II &nbsp;·&nbsp; Landfall</p>
+    <p>The clouds part like curtains drawn back, and the earth rises slowly to meet the traveler — green, after the long blue.</p>
+  </div>
+
+  <div class="cap low-left" data-a="0.43" data-b="0.565">
+    <p class="eyebrow">III &nbsp;·&nbsp; The Rivers</p>
+    <p class="ar">جَنَّاتٍ تَجْرِي مِن تَحْتِهَا الْأَنْهَارُ</p>
+    <p>…gardens beneath which rivers flow… The bird banks low, and the water keeps pace beneath its shadow.</p>
+    <span class="ref">the recurring promise — placeholder verse</span>
+  </div>
+
+  <div class="cap right" data-a="0.615" data-b="0.745" style="top:20vh">
+    <p class="eyebrow">IV &nbsp;·&nbsp; The Weave</p>
+    <p>Through arch after arch the path threads onward — shade, then light, then shade again — and the river keeps its promise alongside.</p>
+  </div>
+
+  <div class="cap center" data-a="0.79" data-b="0.885">
+    <p class="eyebrow">V &nbsp;·&nbsp; The Return</p>
+    <p>And when the journey has shown what it was sent to show, the sky calls its traveler home.</p>
+  </div>
+
+  <div class="cap center dark" data-a="0.925" data-b="1.2" style="top:46%">
+    <p class="ar">يَا أَيَّتُهَا النَّفْسُ الْمُطْمَئِنَّةُ ارْجِعِي إِلَىٰ رَبِّكِ رَاضِيَةً مَّرْضِيَّةً</p>
+    <p>O soul at peace — return to your Lord, well-pleased and pleasing.</p>
+    <span class="ref">Qur’an 89:27–28 — placeholder verse&nbsp;&nbsp;·&nbsp;&nbsp;end of study 01</span>
+  </div>
+
+  <div id="hint">Scroll</div>
+  <div id="rail"><div id="railFill"></div></div>
+  <div id="note">study 01 · placeholder content — real story &amp; images drop into the marked slots</div>
+</div>
+
+<script>
+(() => {
+  'use strict';
+  const $ = id => document.getElementById(id);
+  const clamp = (v,a,b) => v<a?a:v>b?b:v;
+  const lerp  = (a,b,t) => a+(b-a)*t;
+  const rng   = (p,a,b) => clamp((p-a)/(b-a),0,1);
+  const sm    = t => t*t*(3-2*t);                     // smoothstep
+  const RM = matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+  /* ---------- sky: a color journey keyed to overall progress ---------- */
+  const hx = c => [parseInt(c.slice(1,3),16),parseInt(c.slice(3,5),16),parseInt(c.slice(5,7),16)];
+  const skyStops = [
+    [0.00,'#050816','#0b1230','#141c3f'],   // deep night
+    [0.14,'#0d1533','#2a2a5e','#6e4a72'],   // pre-dawn
+    [0.26,'#27356b','#7c5a8a','#e0906f'],   // dawn rose
+    [0.40,'#3f6fa8','#7fb2c9','#e8d9b0'],   // morning over the river
+    [0.58,'#4a7fae','#8fc3cf','#dfe7c8'],   // full day
+    [0.72,'#3c6c9a','#c9a97a','#f0d9a8'],   // late gold
+    [0.84,'#2e3f77','#b8863f','#ffdf9e'],   // ascent amber
+    [1.00,'#241a4e','#8a5f96','#ffe9c4'],   // luminous dusk
+  ].map(s=>[s[0],hx(s[1]),hx(s[2]),hx(s[3])]);
+  function skyAt(p){
+    let i=0; while(i<skyStops.length-2 && p>skyStops[i+1][0]) i++;
+    const A=skyStops[i], B=skyStops[i+1], t=sm(rng(p,A[0],B[0]));
+    const mix=(a,b)=>`rgb(${a.map((v,k)=>Math.round(lerp(v,b[k],t))).join(',')})`;
+    return `linear-gradient(180deg, ${mix(A[1],B[1])} 0%, ${mix(A[2],B[2])} 55%, ${mix(A[3],B[3])} 100%)`;
+  }
+
+  /* ---------- bird flight path: keyframes of [p, x(vw), y(vh), scale, rot] ---------- */
+  const K = [
+    [0.000,72,22,.32,-6],[0.050,58,26,.40,4],[0.100,40,30,.52,14],
+    [0.150,55,40,.70,26],[0.210,45,52,.88,14],[0.270,50,56,1.00,2],
+    [0.330,44,60,1.02,-3],[0.400,40,62,1.05,2],[0.470,54,65,1.08,-2],
+    [0.540,42,61,1.10,3],[0.600,55,55,1.12,-6],[0.660,40,60,1.15,5],
+    [0.720,52,56,1.15,-4],[0.780,48,46,1.00,-16],[0.850,55,30,.72,-26],
+    [0.910,50,24,.48,-10],[0.960,50,34,.30,0],[1.000,50,38,.22,0],
+  ];
+  function birdAt(p){
+    let i=0; while(i<K.length-2 && p>K[i+1][0]) i++;
+    const A=K[i],B=K[i+1],t=sm(rng(p,A[0],B[0]));
+    return {x:lerp(A[1],B[1],t), y:lerp(A[2],B[2],t), s:lerp(A[3],B[3],t), r:lerp(A[4],B[4],t)};
+  }
+
+  /* ---------- element handles ---------- */
+  const sky=$('sky'), moon=$('moon'), world=$('world'),
+        mtnFar=$('mtnFar'), mtnNear=$('mtnNear'), hills=$('hills'), riverWrap=$('riverWrap'),
+        flow=$('flow'), bird=$('bird'), glow=$('glow'), rays=$('rays'),
+        imgSlot=$('imgSlot'), hint=$('hint'), railFill=$('railFill'),
+        cl=[$('cl1'),$('cl2'),$('cl3')],
+        fg=[$('fg1'),$('fg2'),$('fg3'),$('fg4')],
+        caps=[...document.querySelectorAll('.cap'), $('title')];
+
+  /* ---------- canvases ---------- */
+  const starC=$('stars'), fxC=$('fxTrail');
+  const sCtx=starC.getContext('2d'), fCtx=fxC.getContext('2d');
+  let W=innerWidth, H=innerHeight, DPR=Math.min(devicePixelRatio||1,2);
+  let starField=[];
+  function sizeCanvas(c,ctx){ c.width=W*DPR; c.height=H*DPR; ctx.setTransform(DPR,0,0,DPR,0,0); }
+  function buildStars(){
+    starField = Array.from({length:220},()=>({
+      x:Math.random()*W, y:Math.random()*H, r:Math.random()*1.4+.3,
+      ph:Math.random()*Math.PI*2, sp:Math.random()*1.2+.4
+    }));
+  }
+  function resize(){
+    W=innerWidth; H=innerHeight;
+    sizeCanvas(starC,sCtx); sizeCanvas(fxC,fCtx); buildStars();
+    maxScroll = $('driver').offsetHeight - H;
+  }
+
+  /* ---------- particles (bird trail, river sparkles, ascent motes, final burst) ---------- */
+  const parts=[];
+  function spawn(x,y,vx,vy,life,size,hue){ parts.push({x,y,vx,vy,life,max:life,size,hue}); }
+  function drawParticles(dt,now){
+    fCtx.clearRect(0,0,W,H);
+    fCtx.globalCompositeOperation='lighter';
+    for(let i=parts.length-1;i>=0;i--){
+      const q=parts[i]; q.life-=dt; if(q.life<=0){parts.splice(i,1);continue;}
+      q.x+=q.vx*dt*60; q.y+=q.vy*dt*60;
+      const a=sm(q.life/q.max);
+      fCtx.beginPath();
+      fCtx.fillStyle=`hsla(${q.hue},85%,78%,${a*.8})`;
+      fCtx.arc(q.x,q.y,q.size*a+0.4,0,7);
+      fCtx.fill();
+    }
+    fCtx.globalCompositeOperation='source-over';
+  }
+
+  /* ---------- stars ---------- */
+  function drawStars(p,now){
+    const night=1-sm(rng(p,.10,.26)), fin=sm(rng(p,.86,.98));
+    const a=Math.max(night,fin*.9);
+    sCtx.clearRect(0,0,W,H);
+    if(a<=0.01) return;
+    const gold=fin>night;
+    for(const st of starField){
+      const tw=.55+.45*Math.sin(now*.001*st.sp+st.ph);
+      sCtx.beginPath();
+      sCtx.fillStyle=gold?`rgba(255,225,161,${a*tw})`:`rgba(205,214,255,${a*tw})`;
+      sCtx.arc(st.x,st.y,st.r,0,7);
+      sCtx.fill();
+    }
+  }
+
+  /* ---------- clouds: window [a,b], drift from y0 → y1 (vh), scale s0 → s1 ---------- */
+  const cloudCfg=[
+    {a:.055,b:.325,y0:35,y1:-150,s0:1.0,s1:1.9,base:.9, aa:.775,ab:.95,ay0:-130,ay1:90},
+    {a:.085,b:.305,y0:55,y1:-170,s0:1.1,s1:2.2,base:.8, aa:.79, ab:.945,ay0:-150,ay1:110},
+    {a:.110,b:.275,y0:75,y1:-200,s0:1.3,s1:2.6,base:.95,aa:.805,ab:.94, ay0:-170,ay1:130},
+  ];
+  function updClouds(p,mx){
+    cloudCfg.forEach((c,i)=>{
+      const el=cl[i]; let t=-1,y=0,s=1;
+      if(p>=c.a&&p<=c.b){ t=rng(p,c.a,c.b); y=lerp(c.y0,c.y1,t); s=lerp(c.s0,c.s1,t); }
+      else if(p>=c.aa&&p<=c.ab){ t=rng(p,c.aa,c.ab); y=lerp(c.ay0,c.ay1,t); s=1.6; }
+      if(t<0){ el.style.opacity=0; return; }
+      const fade=Math.min(rng(t,0,.18),1-rng(t,.82,1));
+      el.style.opacity=(sm(fade)*c.base).toFixed(3);
+      el.style.transform=`translate(${mx*(i+1)*1.2}vw, ${y}vh) scale(${s})`;
+    });
+  }
+
+  /* ---------- foreground weave: [a,b, xStart, xEnd (vw), left offset] ---------- */
+  const fgCfg=[
+    {a:.575,b:.665,x0:115,x1:-70},
+    {a:.615,b:.715,x0:120,x1:-90},
+    {a:.665,b:.775,x0:115,x1:-80},
+    {a:.545,b:.625,x0:110,x1:-60},
+  ];
+  function updFg(p){
+    fgCfg.forEach((c,i)=>{
+      const el=fg[i];
+      if(p<c.a||p>c.b){ el.style.opacity=0; return; }
+      const t=rng(p,c.a,c.b);
+      el.style.opacity=Math.min(rng(t,0,.1),1-rng(t,.9,1)).toFixed(3);
+      el.style.transform=`translateX(${lerp(c.x0,c.x1,t)}vw)`;
+    });
+  }
+
+  /* ---------- captions ---------- */
+  function updCaps(p){
+    for(const el of caps){
+      const a=+el.dataset.a, b=+el.dataset.b, w=b-a;
+      const o=Math.min(rng(p,a,a+w*.22), 1-rng(p,b-w*.22,b));
+      const v=sm(clamp(o,0,1));
+      el.style.opacity=v.toFixed(3);
+      const rise=(1-sm(rng(p,a,a+w*.22)))*3;
+      if(el.id==='title') el.style.transform=`translateY(${rise}vh)`;
+      else el.style.transform=`${el.classList.contains('center')?'translate(-50%,-50%) ':''}translateY(${rise}vh)`;
+    }
+  }
+
+  /* ---------- main loop ---------- */
+  let maxScroll=1, cur=0, lastNow=0, burstDone=false, frame=0, mx=0, mxT=0;
+  addEventListener('mousemove',e=>{ mxT=(e.clientX/W-.5)*2; },{passive:true});
+
+  function tick(now){
+    const dt=Math.min((now-lastNow)/1000,.05)||.016; lastNow=now; frame++;
+    const target=scrollY;
+    cur = RM ? target : lerp(cur,target,.09);
+    if(Math.abs(cur-target)<.4) cur=target;
+    const p=clamp(cur/maxScroll,0,1);
+    mx = lerp(mx,mxT,.04);
+
+    /* sky + celestial */
+    sky.style.background=skyAt(p);
+    drawStars(p,now);
+    const mFade=1-sm(rng(p,.05,.17));
+    moon.style.opacity=mFade.toFixed(3);
+    moon.style.transform=`translateY(${sm(rng(p,0,.2))*46}vh)`;
+
+    /* terrain rises during landfall, drifts sideways along the river, sinks on ascent */
+    const drift=rng(p,.40,.78);
+    const asc=sm(rng(p,.775,.925));
+    const riseF=sm(rng(p,.215,.325)), riseN=sm(rng(p,.245,.355)), riseH=sm(rng(p,.275,.40));
+    mtnFar .style.transform=`translate(${-4*drift + mx*.6}vw, ${lerp(70,0,riseF)}vh)`;
+    mtnNear.style.transform=`translate(${-11*drift + mx*1.2}vw, ${lerp(85,0,riseN)}vh)`;
+    hills  .style.transform=`translate(${-24*drift + mx*2.0}vw, ${lerp(95,0,riseH)}vh)`;
+    riverWrap.style.transform=`translateY(${lerp(100,0,riseH)}vh)`;
+    world.style.transform=`translateY(${asc*38}vh) scale(${1-asc*.45})`;
+    world.style.opacity=(1-asc*.9).toFixed(3);
+    flow.style.strokeDashoffset = -(now*.02 + drift*700);
+
+    updClouds(p,mx); updFg(p); updCaps(p);
+
+    /* image slot window */
+    {
+      const a=.44,b=.60;
+      const t=rng(p,a,b);
+      const o=(p<a||p>b)?0:Math.min(rng(t,0,.2),1-rng(t,.8,1));
+      imgSlot.style.opacity=sm(o).toFixed(3);
+      imgSlot.style.transform=`translateX(${-7*t}vw)`;
+    }
+
+    /* god-rays during the weave */
+    rays.style.opacity=(Math.min(rng(p,.60,.66),1-rng(p,.74,.80))*.8).toFixed(3);
+
+    /* the bird */
+    const B=birdAt(p);
+    const bob=RM?0:Math.sin(now*.002+p*30)*1.2;
+    const sway=RM?0:Math.sin(now*.0016)*3;
+    bird.style.transform=`translate(${B.x}vw, ${B.y+bob}vh) rotate(${B.r+sway}deg) scale(${B.s})`;
+    const bo=1-sm(rng(p,.935,.975));
+    bird.style.opacity=bo.toFixed(3);
+    document.documentElement.style.setProperty('--flap', B.r>14 ? '1.5s' : B.r<-12 ? '.42s' : '.65s');
+
+    /* particles */
+    if(!RM){
+      const bx=B.x/100*W, by=(B.y+bob)/100*H;
+      if(p>.02&&p<.94&&frame%2===0)
+        spawn(bx-38*B.s, by+6*B.s, -.6-Math.random()*.6, (Math.random()-.5)*.5, .9+Math.random()*.5, 2.2*B.s, 45);
+      if(p>.36&&p<.80&&frame%3===0)
+        spawn(Math.random()*W, H*(.62+Math.random()*.3), (Math.random()-.5)*.3, -.25, .8+Math.random()*.6, 1.4, 50+Math.random()*10);
+      if(p>.86&&p<.985&&frame%2===0)
+        spawn(Math.random()*W, H+10, (Math.random()-.5)*.4, -1.2-Math.random()*1.4, 1.4+Math.random(), 1.8, 44);
+      if(p>.952&&!burstDone){ burstDone=true;
+        for(let i=0;i<70;i++){ const a=Math.random()*Math.PI*2, v=1+Math.random()*3;
+          spawn(W*.5,H*.34,Math.cos(a)*v,Math.sin(a)*v,1.2+Math.random(),2.4,46); } }
+      if(p<.9) burstDone=false;
+    }
+    drawParticles(dt,now);
+
+    /* glow of the return */
+    const g=sm(rng(p,.835,.97));
+    glow.style.opacity=g.toFixed(3);
+    glow.style.transform=`scale(${.7+g*.5})`;
+
+    hint.style.opacity=(1-rng(p,.005,.03)).toFixed(3);
+    railFill.style.height=(p*100).toFixed(2)+'%';
+
+    requestAnimationFrame(tick);
+  }
+
+  addEventListener('resize',resize);
+  resize();
+  requestAnimationFrame(tick);
+})();
+</script>
